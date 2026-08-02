@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { productSchema, type ProductInput } from "@/lib/validations/product";
 import { uploadProductImage } from "@/app/admin/(painel)/produtos/actions";
+import { cloudinaryResize } from "@/lib/cloudinary-url";
 
 type Category = { id: string; name: string };
 
@@ -133,7 +134,7 @@ export function ProductForm({
           {imageUrl && (
             // eslint-disable-next-line @next/next/no-img-element -- pré-visualização de imagens externas/Cloudinary
             <img
-              src={imageUrl}
+              src={cloudinaryResize(imageUrl, 128)}
               alt=""
               className="size-16 shrink-0 rounded-md border border-input object-cover"
             />
@@ -145,7 +146,7 @@ export function ProductForm({
               accept="image/*"
               onChange={handleFileChange}
               disabled={isUploading}
-              className="w-full text-sm"
+              className="block w-full text-sm text-muted-foreground file:mr-4 file:cursor-pointer file:rounded-md file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-foreground hover:file:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
             />
             {isUploading && (
               <p className="text-xs text-muted-foreground">A enviar para o Cloudinary...</p>

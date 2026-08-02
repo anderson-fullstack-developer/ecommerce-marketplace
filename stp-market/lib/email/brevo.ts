@@ -13,9 +13,10 @@ type SendEmailInput = {
   to: { email: string; name?: string }[];
   subject: string;
   html: string;
+  replyTo?: { email: string; name?: string };
 };
 
-export async function sendEmail({ to, subject, html }: SendEmailInput) {
+export async function sendEmail({ to, subject, html, replyTo }: SendEmailInput) {
   const apiKey = process.env.BREVO_API_KEY;
   if (!apiKey) {
     throw new Error("BREVO_API_KEY não está configurada.");
@@ -33,6 +34,7 @@ export async function sendEmail({ to, subject, html }: SendEmailInput) {
       to,
       subject,
       htmlContent: html,
+      ...(replyTo ? { replyTo } : {}),
     }),
   });
 

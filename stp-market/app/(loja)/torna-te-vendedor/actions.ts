@@ -1,7 +1,10 @@
 "use server";
 
 import bcrypt from "bcryptjs";
+import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
+import { getSiteUrl } from "@/lib/site-url";
+import { sendVendorApplicationReceivedEmail } from "@/lib/email/send";
 import {
   vendorApplicationSchema,
   type VendorApplicationInput,
@@ -26,4 +29,15 @@ export async function applyAsVendor(input: VendorApplicationInput) {
       message: data.message || null,
     },
   });
+
+  try {
+    const siteUrl = getSiteUrl((await headers()).get("origin"));
+    await sendVendorApplicationReceivedEmail({
+      vendorName: data.name,
+      vendorEmail: data.email,
+      siteUrl,
+    });
+  } catch (error) {
+    console.error("Falha ao enviar email de candidatura recebida:", error);
+  }
 }

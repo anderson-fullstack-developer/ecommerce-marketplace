@@ -1,17 +1,24 @@
 import Link from "next/link";
+import Image from "next/image";
+import { auth } from "@/auth";
 import { CartLink } from "@/components/CartLink";
 
-export function Navbar() {
+export async function Navbar() {
+  const session = await auth();
+  const isCustomer = session?.user?.role === "CUSTOMER";
+
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="flex items-baseline gap-1">
-          <span className="text-lg font-heading font-semibold tracking-tight text-primary">
-            Neto
-          </span>
-          <span className="text-lg font-heading font-semibold tracking-tight">
-            STP
-          </span>
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/brand/logo.png"
+            alt="Neto STP"
+            width={72}
+            height={48}
+            className="h-12 w-18 rounded-full object-cover"
+            priority
+          />
         </Link>
 
         <nav className="flex items-center gap-6 text-sm font-medium">
@@ -23,6 +30,12 @@ export function Navbar() {
           </Link>
           <Link href="/torna-te-vendedor" className="hidden hover:text-primary sm:inline">
             Torna-te vendedor
+          </Link>
+          <Link
+            href={isCustomer ? "/conta/encomendas" : "/conta/login"}
+            className="hidden hover:text-primary sm:inline"
+          >
+            {isCustomer ? "As minhas encomendas" : "Entrar"}
           </Link>
           <CartLink />
         </nav>

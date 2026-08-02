@@ -22,6 +22,14 @@ const STATUS_LABELS: Record<string, string> = {
   CANCELLED: "Cancelada",
 };
 
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 function orderReference(orderId: string) {
   return orderId.slice(-8).toUpperCase();
 }
@@ -181,5 +189,59 @@ export function newOrderAdminEmail(params: {
   return {
     subject: `Nova encomenda recebida — €${params.total.toFixed(2)}`,
     html: emailShell("Nova encomenda", body),
+  };
+}
+
+export function vendorApplicationReceivedEmail(params: { vendorName: string; siteUrl: string }) {
+  const body = `
+    <p style="margin:0 0 12px;font-size:15px;">Olá <strong>${params.vendorName}</strong>,</p>
+    <p style="margin:0 0 12px;font-size:15px;">Recebemos a tua candidatura para vender na Neto STP. A nossa equipa vai analisá-la e entra em contacto assim que houver uma decisão.</p>
+    ${ctaButton("Ver a loja →", `${params.siteUrl}/loja`)}
+    ${signOff()}
+  `;
+  return {
+    subject: "Recebemos a tua candidatura — Neto STP",
+    html: emailShell("Candidatura recebida", body),
+  };
+}
+
+export function vendorApprovedEmail(params: { vendorName: string; siteUrl: string }) {
+  const body = `
+    <p style="margin:0 0 12px;font-size:15px;">Olá <strong>${params.vendorName}</strong>,</p>
+    <p style="margin:0 0 12px;font-size:15px;">Boas notícias! A tua candidatura para vender na Neto STP foi <strong>aprovada</strong>. Já podes entrar no painel de fornecedor e começar a adicionar os teus produtos.</p>
+    ${ctaButton("Entrar no painel →", `${params.siteUrl}/fornecedor/login`)}
+    ${signOff()}
+  `;
+  return {
+    subject: "A tua candidatura foi aprovada — Neto STP",
+    html: emailShell("Candidatura aprovada", body),
+  };
+}
+
+export function contactMessageEmail(params: { name: string; email: string; message: string }) {
+  const body = `
+    <p style="margin:0 0 12px;font-size:15px;">Nova mensagem recebida através do formulário de contacto.</p>
+    <table role="presentation" width="100%" style="font-size:14px;line-height:1.7;margin:16px 0;">
+      <tr><td style="color:${COLORS.muted};width:70px;">Nome</td><td>${escapeHtml(params.name)}</td></tr>
+      <tr><td style="color:${COLORS.muted};">Email</td><td>${escapeHtml(params.email)}</td></tr>
+    </table>
+    <p style="margin:16px 0 4px;font-size:13px;color:${COLORS.muted};">Mensagem</p>
+    <p style="margin:0;white-space:pre-line;font-size:15px;">${escapeHtml(params.message)}</p>
+  `;
+  return {
+    subject: `Nova mensagem de contacto — ${escapeHtml(params.name)}`,
+    html: emailShell("Mensagem de contacto", body),
+  };
+}
+
+export function vendorRejectedEmail(params: { vendorName: string; siteUrl: string }) {
+  const body = `
+    <p style="margin:0 0 12px;font-size:15px;">Olá <strong>${params.vendorName}</strong>,</p>
+    <p style="margin:0 0 12px;font-size:15px;">Obrigado pelo teu interesse em vender na Neto STP. Depois de analisar a tua candidatura, não vamos avançar neste momento.</p>
+    ${signOff()}
+  `;
+  return {
+    subject: "A tua candidatura — Neto STP",
+    html: emailShell("Candidatura não aprovada", body),
   };
 }

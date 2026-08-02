@@ -1,20 +1,17 @@
 import Link from "next/link";
+import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/ProductCard";
-import { CategoryCard } from "@/components/CategoryCard";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [categories, featuredProducts] = await Promise.all([
-    prisma.category.findMany({ orderBy: { name: "asc" } }),
-    prisma.product.findMany({
-      where: { active: true },
-      orderBy: { createdAt: "desc" },
-      take: 4,
-    }),
-  ]);
+  const featuredProducts = await prisma.product.findMany({
+    where: { active: true, approvalStatus: "APPROVED" },
+    orderBy: { createdAt: "desc" },
+    take: 4,
+  });
 
   return (
     <div>
@@ -27,9 +24,8 @@ export default async function HomePage() {
             Um pouco de tudo das ilhas, à porta de casa
           </h1>
           <p className="mt-4 max-w-xl text-base opacity-90 sm:text-lg">
-            Café, cacau, artesanato, tecidos africanos e muito mais, direto de
-            São Tomé e Príncipe, selecionados com cuidado e entregues em
-            Portugal.
+            O melhor de São Tomé e Príncipe, selecionado com cuidado e
+            entregue em Portugal.
           </p>
           <Button
             render={<Link href="/loja" />}
@@ -63,30 +59,31 @@ export default async function HomePage() {
             </p>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            {["Café", "Cacau", "Artesanato", "Tecidos"].map((label) => (
+            {[
+              { label: "Café", src: "/produtos/cafe.png" },
+              { label: "Cacau", src: "/produtos/cacau.png" },
+              { label: "Doces", src: "/produtos/doces.png" },
+              { label: "Tecidos", src: "/produtos/tecidos.png" },
+            ].map(({ label, src }) => (
               <div
                 key={label}
-                className="flex aspect-square items-center justify-center rounded-xl bg-secondary/60 font-heading text-lg font-medium text-secondary-foreground"
+                className="relative flex aspect-square items-end overflow-hidden rounded-xl bg-secondary/60"
               >
-                {label}
+                <Image
+                  src={src}
+                  alt={label}
+                  fill
+                  sizes="(min-width: 640px) 25vw, 50vw"
+                  className="object-cover"
+                />
+                <span className="relative z-10 w-full bg-linear-to-t from-black/60 to-transparent px-3 py-2 font-heading text-lg font-medium text-white">
+                  {label}
+                </span>
               </div>
             ))}
           </div>
         </div>
       </section>
-
-      {categories.length > 0 && (
-        <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-          <h2 className="font-heading text-2xl font-semibold sm:text-3xl">
-            Categorias
-          </h2>
-          <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
-            {categories.map((category) => (
-              <CategoryCard key={category.id} category={category} />
-            ))}
-          </div>
-        </section>
-      )}
 
       {featuredProducts.length > 0 && (
         <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">

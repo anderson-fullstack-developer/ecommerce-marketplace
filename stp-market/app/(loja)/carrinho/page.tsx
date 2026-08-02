@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
+import { cloudinaryResize } from "@/lib/cloudinary-url";
 
 export default function CarrinhoPage() {
   const { items, updateQuantity, removeItem, subtotal } = useCart();
@@ -34,8 +35,9 @@ export default function CarrinhoPage() {
           <li key={item.productId} className="flex gap-4 py-6">
             {/* eslint-disable-next-line @next/next/no-img-element -- imagens externas, sem Cloudinary ainda (Passo 7) */}
             <img
-              src={item.imageUrl}
+              src={cloudinaryResize(item.imageUrl, 160)}
               alt={item.name}
+              loading="lazy"
               className="size-20 shrink-0 rounded-lg bg-muted object-cover"
             />
 

@@ -22,7 +22,7 @@ export async function createVendorProduct(input: ProductInput) {
   const slug = await uniqueProductSlug(data.name);
 
   await prisma.product.create({
-    data: { ...data, slug, vendorId },
+    data: { ...data, slug, vendorId, approvalStatus: "PENDING" },
   });
 
   revalidatePath("/fornecedor/produtos");
@@ -46,7 +46,7 @@ export async function updateVendorProduct(id: string, input: ProductInput) {
 
   await prisma.product.update({
     where: { id },
-    data: { ...data, slug },
+    data: { ...data, slug, approvalStatus: "PENDING" },
   });
 
   revalidatePath("/fornecedor/produtos");

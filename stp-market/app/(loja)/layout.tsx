@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { ChatAssistant } from "@/components/ChatAssistant";
 import { CartProvider } from "@/hooks/use-cart";
 
 export default function LojaLayout({ children }: { children: React.ReactNode }) {
@@ -8,6 +9,7 @@ export default function LojaLayout({ children }: { children: React.ReactNode }) 
       <Navbar />
       <main className="flex-1">{children}</main>
       <Footer />
+      <ChatAssistant />
     </CartProvider>
   );
 }

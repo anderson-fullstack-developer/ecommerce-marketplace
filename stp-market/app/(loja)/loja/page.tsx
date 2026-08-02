@@ -5,16 +5,18 @@ import { StoreFilters } from "@/components/StoreFilters";
 export default async function LojaPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; categoria?: string; sort?: string }>;
+  searchParams: Promise<{ q?: string; categoria?: string; sort?: string; vendedor?: string }>;
 }) {
-  const { q, categoria, sort } = await searchParams;
+  const { q, categoria, sort, vendedor } = await searchParams;
 
-  const [products, categories] = await Promise.all([
+  const [products, categories, vendorName] = await Promise.all([
     prisma.product.findMany({
       where: {
         active: true,
+        approvalStatus: "APPROVED",
         ...(q ? { name: { contains: q, mode: "insensitive" } } : {}),
         ...(categoria ? { category: { slug: categoria } } : {}),
+        ...(vendedor ? { vendorId: vendedor } : {}),
       },
       orderBy:
         sort === "price-asc"
@@ -24,13 +26,18 @@ export default async function LojaPage({
             : { createdAt: "desc" },
     }),
     prisma.category.findMany({ orderBy: { name: "asc" } }),
+    vendedor
+      ? prisma.vendor.findUnique({ where: { id: vendedor }, select: { name: true } })
+      : null,
   ]);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
       <h1 className="font-heading text-3xl font-semibold">Loja</h1>
       <p className="mt-2 text-muted-foreground">
-        Produtos genuínos de São Tomé e Príncipe.
+        {vendorName
+          ? `Produtos de ${vendorName.name}.`
+          : "Produtos genuínos de São Tomé e Príncipe."}
       </p>
 
       <div className="mt-8">

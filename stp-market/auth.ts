@@ -51,6 +51,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return { id: vendor.id, email: vendor.email, role: "VENDOR" };
       },
     }),
+    Credentials({
+      id: "customer-credentials",
+      credentials: {
+        email: {},
+        password: {},
+      },
+      authorize: async (credentials) => {
+        const parsed = loginSchema.safeParse(credentials);
+        if (!parsed.success) return null;
+
+        const customer = await prisma.customer.findUnique({
+          where: { email: parsed.data.email },
+        });
+        if (!customer || !customer.password) return null;
+
+        const passwordsMatch = await bcrypt.compare(parsed.data.password, customer.password);
+        if (!passwordsMatch) return null;
+
+        return { id: customer.id, email: customer.email, role: "CUSTOMER" };
+      },
+    }),
   ],
   callbacks: {
     ...authConfig.callbacks,

@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getVendorBalance } from "@/lib/vendor-balance";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardHeader,
@@ -25,7 +27,16 @@ export default async function VendorDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Painel</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Painel</h1>
+        <Button
+          variant="outline"
+          render={<Link href={`/loja?vendedor=${vendorId}`} target="_blank" />}
+          nativeButton={false}
+        >
+          Ver a minha loja
+        </Button>
+      </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {stats.map((stat) => (

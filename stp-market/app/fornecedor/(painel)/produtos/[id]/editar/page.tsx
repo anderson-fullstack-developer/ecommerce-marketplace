@@ -25,6 +25,10 @@ export default async function EditVendorProductPage({
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Editar produto</h1>
+      <p className="text-sm text-muted-foreground">
+        Guardar alterações envia o produto novamente para aprovação e ele fica indisponível na
+        loja até ser revisto.
+      </p>
       <ProductForm
         categories={categories}
         defaultValues={product}

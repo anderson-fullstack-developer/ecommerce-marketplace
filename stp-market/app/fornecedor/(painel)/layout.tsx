@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { auth } from "@/auth";
 import { SignOutButton } from "@/components/admin/SignOutButton";
 
@@ -18,9 +19,18 @@ export default async function VendorPanelLayout({
   return (
     <div className="flex min-h-screen">
       <aside className="w-60 shrink-0 border-r bg-muted/30 p-4">
-        <div className="mb-6">
-          <p className="text-lg font-semibold">Neto STP</p>
-          <p className="text-xs text-muted-foreground">Painel do Fornecedor</p>
+        <div className="mb-6 flex items-center gap-2">
+          <Image
+            src="/brand/logo.png"
+            alt="Neto STP"
+            width={48}
+            height={32}
+            className="h-8 w-12 rounded-full object-cover"
+          />
+          <div>
+            <p className="text-sm font-semibold">Neto STP</p>
+            <p className="text-xs text-muted-foreground">Painel do Fornecedor</p>
+          </div>
         </div>
         <nav className="space-y-1">
           {navItems.map((item) => (

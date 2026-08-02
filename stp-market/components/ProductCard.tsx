@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
+import { cloudinaryResize } from "@/lib/cloudinary-url";
 
 type Product = {
   id: string;
@@ -37,8 +38,9 @@ export function ProductCard({ product }: { product: Product }) {
         <div className="aspect-square overflow-hidden bg-muted">
           {/* eslint-disable-next-line @next/next/no-img-element -- imagens externas, sem Cloudinary ainda (Passo 7) */}
           <img
-            src={product.imageUrl}
+            src={cloudinaryResize(product.imageUrl, 500)}
             alt={product.name}
+            loading="lazy"
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         </div>

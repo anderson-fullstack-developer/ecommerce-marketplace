@@ -27,27 +27,35 @@ model Category {
   products Product[]
 }
 
+enum ProductApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model Product {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  description String
-  price       Float
-  imageUrl    String
-  stock       Int
-  active      Boolean  @default(true)
-  categoryId  String
-  category    Category @relation(fields: [categoryId], references: [id])
-  vendorId    String?
-  vendor      Vendor?  @relation(fields: [vendorId], references: [id])
-  orderItems  OrderItem[]
-  createdAt   DateTime @default(now())
+  id             String                @id @default(cuid())
+  name           String
+  slug           String                @unique
+  description    String
+  price          Float
+  imageUrl       String
+  stock          Int
+  active         Boolean               @default(true)
+  approvalStatus ProductApprovalStatus @default(APPROVED)
+  categoryId     String
+  category       Category              @relation(fields: [categoryId], references: [id])
+  vendorId       String?
+  vendor         Vendor?               @relation(fields: [vendorId], references: [id])
+  orderItems     OrderItem[]
+  createdAt      DateTime              @default(now())
 }
 
 model Customer {
   id         String  @id @default(cuid())
   name       String
-  email      String
+  email      String  @unique
+  password   String?
   phone      String
   address    String
   city       String

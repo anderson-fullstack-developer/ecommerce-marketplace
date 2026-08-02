@@ -86,21 +86,27 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, siteUrl
   const shippingDetails = session.collected_information?.shipping_details;
   const customerDetails = session.customer_details;
 
-  const customer = await prisma.customer.create({
-    data: {
-      name: shippingDetails?.name ?? customerDetails?.name ?? "Cliente",
-      email: customerDetails?.email ?? "",
-      phone: customerDetails?.phone ?? "",
-      address:
-        [shippingDetails?.address.line1, shippingDetails?.address.line2]
-          .filter(Boolean)
-          .join(", ") || (customerDetails?.address?.line1 ?? ""),
-      city: shippingDetails?.address.city ?? customerDetails?.address?.city ?? "",
-      postalCode:
-        shippingDetails?.address.postal_code ?? customerDetails?.address?.postal_code ?? "",
-      country: shippingDetails?.address.country ?? customerDetails?.address?.country ?? "",
-    },
-  });
+  const customerData = {
+    name: shippingDetails?.name ?? customerDetails?.name ?? "Cliente",
+    email: customerDetails?.email ?? "",
+    phone: customerDetails?.phone ?? "",
+    address:
+      [shippingDetails?.address.line1, shippingDetails?.address.line2]
+        .filter(Boolean)
+        .join(", ") || (customerDetails?.address?.line1 ?? ""),
+    city: shippingDetails?.address.city ?? customerDetails?.address?.city ?? "",
+    postalCode:
+      shippingDetails?.address.postal_code ?? customerDetails?.address?.postal_code ?? "",
+    country: shippingDetails?.address.country ?? customerDetails?.address?.country ?? "",
+  };
+
+  const customer = customerData.email
+    ? await prisma.customer.upsert({
+        where: { email: customerData.email },
+        create: customerData,
+        update: customerData,
+      })
+    : await prisma.customer.create({ data: customerData });
 
   const total = orderItemsData.reduce((sum, item) => sum + item.price * item.quantity, 0);
 

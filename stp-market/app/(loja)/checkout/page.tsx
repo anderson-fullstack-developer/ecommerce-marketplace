@@ -42,7 +42,7 @@ export default function CheckoutPage() {
     <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
       <h1 className="font-heading text-3xl font-semibold">Checkout</h1>
       <p className="mt-2 text-muted-foreground">
-        Revê a tua encomenda antes de avançar para o pagamento seguro via Stripe.
+        Revê a tua encomenda antes de avançar para o pagamento seguro.
       </p>
 
       <ul className="mt-8 divide-y divide-border">
@@ -65,8 +65,7 @@ export default function CheckoutPage() {
       </div>
 
       <p className="mt-2 text-xs text-muted-foreground">
-        Morada de envio, contacto e pagamento são recolhidos de forma segura na página do
-        Stripe.
+        Morada de envio, contacto e pagamento são recolhidos de forma segura na página seguinte.
       </p>
 
       <Button
@@ -75,7 +74,7 @@ export default function CheckoutPage() {
         onClick={handleCheckout}
         disabled={isSubmitting}
       >
-        {isSubmitting ? "A abrir pagamento..." : "Pagar com Stripe"}
+        {isSubmitting ? "A abrir pagamento..." : "Finalizar compra"}
       </Button>
     </div>
   );

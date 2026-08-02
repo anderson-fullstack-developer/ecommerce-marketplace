@@ -1,10 +1,16 @@
 import { sendEmail } from "./brevo";
 import {
+  contactMessageEmail,
   newOrderAdminEmail,
   orderConfirmationEmail,
   orderStatusUpdateEmail,
+  vendorApplicationReceivedEmail,
+  vendorApprovedEmail,
+  vendorRejectedEmail,
   type OrderEmailItem,
 } from "./templates";
+
+const CONTACT_EMAIL = "stpnetosabores@gmail.com";
 
 export async function sendOrderConfirmationEmail(params: {
   customerName: string;
@@ -55,4 +61,45 @@ export async function sendNewOrderAdminEmail(params: {
 
   const { subject, html } = newOrderAdminEmail(params);
   await sendEmail({ to: [{ email: adminEmail }], subject, html });
+}
+
+export async function sendVendorApplicationReceivedEmail(params: {
+  vendorName: string;
+  vendorEmail: string;
+  siteUrl: string;
+}) {
+  const { subject, html } = vendorApplicationReceivedEmail(params);
+  await sendEmail({ to: [{ email: params.vendorEmail, name: params.vendorName }], subject, html });
+}
+
+export async function sendVendorApprovedEmail(params: {
+  vendorName: string;
+  vendorEmail: string;
+  siteUrl: string;
+}) {
+  const { subject, html } = vendorApprovedEmail(params);
+  await sendEmail({ to: [{ email: params.vendorEmail, name: params.vendorName }], subject, html });
+}
+
+export async function sendVendorRejectedEmail(params: {
+  vendorName: string;
+  vendorEmail: string;
+  siteUrl: string;
+}) {
+  const { subject, html } = vendorRejectedEmail(params);
+  await sendEmail({ to: [{ email: params.vendorEmail, name: params.vendorName }], subject, html });
+}
+
+export async function sendContactMessageEmail(params: {
+  name: string;
+  email: string;
+  message: string;
+}) {
+  const { subject, html } = contactMessageEmail(params);
+  await sendEmail({
+    to: [{ email: CONTACT_EMAIL }],
+    subject,
+    html,
+    replyTo: { email: params.email, name: params.name },
+  });
 }

@@ -29,6 +29,7 @@ export async function uploadProductImage(formData: FormData) {
   try {
     const result = await cloudinary.uploader.upload(dataUri, {
       folder: "stp-market/produtos",
+      transformation: [{ width: 1600, height: 1600, crop: "limit" }, { quality: "auto", fetch_format: "auto" }],
     });
     return { url: result.secure_url };
   } catch (error) {
@@ -73,6 +74,28 @@ export async function updateProduct(id: string, input: ProductInput) {
   revalidatePath(`/produto/${existing.slug}`);
   if (slug !== existing.slug) revalidatePath(`/produto/${slug}`);
   redirect("/admin/produtos");
+}
+
+export async function approveProduct(id: string) {
+  const product = await prisma.product.update({
+    where: { id },
+    data: { approvalStatus: "APPROVED" },
+  });
+  revalidatePath("/admin/produtos");
+  revalidatePath("/");
+  revalidatePath("/loja");
+  revalidatePath(`/produto/${product.slug}`);
+}
+
+export async function rejectProduct(id: string) {
+  const product = await prisma.product.update({
+    where: { id },
+    data: { approvalStatus: "REJECTED" },
+  });
+  revalidatePath("/admin/produtos");
+  revalidatePath("/");
+  revalidatePath("/loja");
+  revalidatePath(`/produto/${product.slug}`);
 }
 
 export async function deleteProduct(id: string) {

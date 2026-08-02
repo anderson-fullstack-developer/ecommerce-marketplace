@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -44,6 +45,13 @@ export default function AdminLoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4">
       <div className="w-full max-w-sm space-y-6 rounded-lg border bg-background p-8 shadow-sm">
         <div className="space-y-1 text-center">
+          <Image
+            src="/brand/logo.png"
+            alt="Neto STP"
+            width={96}
+            height={64}
+            className="mx-auto h-16 w-24 rounded-full object-cover"
+          />
           <h1 className="text-2xl font-semibold">Neto STP</h1>
           <p className="text-sm text-muted-foreground">Acesso ao painel de administração</p>
         </div>
