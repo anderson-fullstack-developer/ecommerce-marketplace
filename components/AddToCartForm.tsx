@@ -19,8 +19,8 @@ export function AddToCartForm({ product }: { product: Product }) {
   const [quantity, setQuantity] = useState(1);
   const outOfStock = product.stock <= 0;
 
-  function handleAdd() {
-    const result = addItem(
+  async function handleAdd() {
+    const result = await addItem(
       {
         productId: product.id,
         slug: product.slug,

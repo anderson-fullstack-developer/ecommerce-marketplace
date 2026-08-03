@@ -20,8 +20,8 @@ export function ProductCard({ product }: { product: Product }) {
   const { addItem } = useCart();
   const outOfStock = product.stock <= 0;
 
-  function handleAdd() {
-    const result = addItem({
+  async function handleAdd() {
+    const result = await addItem({
       productId: product.id,
       slug: product.slug,
       name: product.name,

@@ -48,15 +48,16 @@ model Product {
   vendorId       String?
   vendor         Vendor?               @relation(fields: [vendorId], references: [id])
   orderItems     OrderItem[]
+  cartItems      CartItem[]
   createdAt      DateTime              @default(now())
 }
 
 model Customer {
-  id                  String    @id @default(cuid())
+  id                  String     @id @default(cuid())
   name                String
-  email               String    @unique
+  email               String     @unique
   password            String?
-  resetToken          String?   @unique
+  resetToken          String?    @unique
   resetTokenExpiresAt DateTime?
   phone               String
   address             String
@@ -64,6 +65,19 @@ model Customer {
   postalCode          String
   country             String
   orders              Order[]
+  cartItems           CartItem[]
+}
+
+model CartItem {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity   Int
+  createdAt  DateTime @default(now())
+
+  @@unique([customerId, productId])
 }
 
 enum OrderStatus {

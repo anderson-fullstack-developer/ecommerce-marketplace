@@ -7,6 +7,15 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import {
+  getServerCart,
+  addServerCartItem,
+  updateServerCartItemQuantity,
+  removeServerCartItem,
+  clearServerCart,
+  mergeLocalCartIntoServer,
+  type AddItemResult,
+} from "@/lib/cart-actions";
 
 export type CartItem = {
   productId: string;
@@ -18,14 +27,14 @@ export type CartItem = {
   quantity: number;
 };
 
-export type AddItemResult = "ok" | "capped" | "maxed";
+export type { AddItemResult };
 
 type CartContextValue = {
   items: CartItem[];
-  addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => AddItemResult;
-  removeItem: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
-  clear: () => void;
+  addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => Promise<AddItemResult>;
+  removeItem: (productId: string) => Promise<void>;
+  updateQuantity: (productId: string, quantity: number) => Promise<void>;
+  clear: () => Promise<void>;
   subtotal: number;
   itemCount: number;
 };
@@ -34,26 +43,74 @@ const CartContext = createContext<CartContextValue | null>(null);
 
 const STORAGE_KEY = "stp-market-cart";
 
-export function CartProvider({ children }: { children: ReactNode }) {
+export function CartProvider({
+  children,
+  isCustomer,
+}: {
+  children: ReactNode;
+  isCustomer: boolean;
+}) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
 
+  // Sem sessão de cliente: carrinho local (localStorage). Com sessão: carrinho do
+  // servidor, fazendo merge do que estava guardado localmente antes do login.
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) setItems(JSON.parse(stored));
-    } catch {
-      // localStorage indisponível ou dados corrompidos — começa com carrinho vazio
+    let cancelled = false;
+    setHydrated(false);
+
+    async function sync() {
+      if (isCustomer) {
+        let localItems: { productId: string; quantity: number }[] = [];
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (stored) {
+            const parsed: CartItem[] = JSON.parse(stored);
+            localItems = parsed.map((i) => ({ productId: i.productId, quantity: i.quantity }));
+          }
+        } catch {
+          // localStorage indisponível ou dados corrompidos — segue sem merge
+        }
+
+        const serverItems = localItems.length
+          ? await mergeLocalCartIntoServer(localItems)
+          : await getServerCart();
+
+        if (cancelled) return;
+        setItems(serverItems);
+        localStorage.removeItem(STORAGE_KEY);
+      } else {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (!cancelled) setItems(stored ? JSON.parse(stored) : []);
+        } catch {
+          if (!cancelled) setItems([]);
+        }
+      }
+      if (!cancelled) setHydrated(true);
     }
-    setHydrated(true);
-  }, []);
+
+    sync();
+    return () => {
+      cancelled = true;
+    };
+  }, [isCustomer]);
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || isCustomer) return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  }, [items, hydrated]);
+  }, [items, hydrated, isCustomer]);
 
-  function addItem(item: Omit<CartItem, "quantity">, quantity = 1): AddItemResult {
+  async function addItem(
+    item: Omit<CartItem, "quantity">,
+    quantity = 1
+  ): Promise<AddItemResult> {
+    if (isCustomer) {
+      const { items: nextItems, result } = await addServerCartItem(item.productId, quantity);
+      setItems(nextItems);
+      return result;
+    }
+
     const existing = items.find((i) => i.productId === item.productId);
     const currentQuantity = existing?.quantity ?? 0;
 
@@ -77,11 +134,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return result;
   }
 
-  function removeItem(productId: string) {
+  async function removeItem(productId: string) {
+    if (isCustomer) {
+      setItems(await removeServerCartItem(productId));
+      return;
+    }
     setItems((current) => current.filter((i) => i.productId !== productId));
   }
 
-  function updateQuantity(productId: string, quantity: number) {
+  async function updateQuantity(productId: string, quantity: number) {
+    if (isCustomer) {
+      setItems(await updateServerCartItemQuantity(productId, quantity));
+      return;
+    }
     setItems((current) =>
       current.map((i) =>
         i.productId === productId
@@ -91,7 +156,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     );
   }
 
-  function clear() {
+  async function clear() {
+    if (isCustomer) {
+      await clearServerCart();
+    }
     setItems([]);
   }
 
