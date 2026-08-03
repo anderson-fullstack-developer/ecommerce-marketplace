@@ -22,8 +22,8 @@ export default async function AdminVendorsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Fornecedores</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Fornecedores já aprovados. Candidaturas por decidir estão em "Candidaturas", pedidos
-          de levantamento em "Levantamentos".
+          Fornecedores já aprovados. Candidaturas por decidir estão em &quot;Candidaturas&quot;,
+          pedidos de levantamento em &quot;Levantamentos&quot;.
         </p>
       </div>
 
