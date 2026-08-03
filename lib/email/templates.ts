@@ -256,6 +256,22 @@ export function contactMessageEmail(params: { name: string; email: string; messa
   };
 }
 
+export function complaintAdminEmail(params: { name: string; email: string; message: string }) {
+  const body = `
+    <p style="margin:0 0 12px;font-size:15px;">Nova reclamação recebida através da loja.</p>
+    <table role="presentation" width="100%" style="font-size:14px;line-height:1.7;margin:16px 0;">
+      <tr><td style="color:${COLORS.muted};width:70px;">Nome</td><td>${escapeHtml(params.name)}</td></tr>
+      <tr><td style="color:${COLORS.muted};">Email</td><td>${escapeHtml(params.email)}</td></tr>
+    </table>
+    <p style="margin:16px 0 4px;font-size:13px;color:${COLORS.muted};">Reclamação</p>
+    <p style="margin:0;white-space:pre-line;font-size:15px;">${escapeHtml(params.message)}</p>
+  `;
+  return {
+    subject: `Reclamação — ${escapeHtml(params.name)}`,
+    html: emailShell("Nova reclamação", body),
+  };
+}
+
 export function newVendorApplicationAdminEmail(params: {
   vendorName: string;
   vendorEmail: string;

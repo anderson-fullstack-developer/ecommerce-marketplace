@@ -1,5 +1,6 @@
 import { sendEmail } from "./brevo";
 import {
+  complaintAdminEmail,
   contactMessageEmail,
   newOrderAdminEmail,
   newVendorApplicationAdminEmail,
@@ -160,6 +161,23 @@ export async function sendContactMessageEmail(params: {
   const { subject, html } = contactMessageEmail(params);
   await sendEmail({
     to: [{ email: CONTACT_EMAIL }],
+    subject,
+    html,
+    replyTo: { email: params.email, name: params.name },
+  });
+}
+
+export async function sendComplaintEmail(params: {
+  name: string;
+  email: string;
+  message: string;
+}) {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (!adminEmail) return;
+
+  const { subject, html } = complaintAdminEmail(params);
+  await sendEmail({
+    to: [{ email: adminEmail }],
     subject,
     html,
     replyTo: { email: params.email, name: params.name },

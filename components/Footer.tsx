@@ -56,6 +56,11 @@ export function Footer() {
                     Formulário de contacto
                   </Link>
                 </li>
+                <li>
+                  <Link href="/reclamacoes" className="hover:text-primary">
+                    Reclamações
+                  </Link>
+                </li>
               </ul>
             </div>
           </nav>
