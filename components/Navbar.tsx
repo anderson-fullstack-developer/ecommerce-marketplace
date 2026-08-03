@@ -33,10 +33,10 @@ export async function Navbar() {
             Torna-te vendedor
           </Link>
           <Link
-            href={isCustomer ? "/conta/encomendas" : "/conta/login"}
+            href={isCustomer ? "/conta" : "/conta/login"}
             className="flex items-center hover:text-primary"
-            aria-label={isCustomer ? "As minhas encomendas" : "Entrar ou criar conta"}
-            title={isCustomer ? "As minhas encomendas" : "Entrar ou criar conta"}
+            aria-label={isCustomer ? "Definições da conta" : "Entrar ou criar conta"}
+            title={isCustomer ? "Definições da conta" : "Entrar ou criar conta"}
           >
             <User className="size-5" />
           </Link>
