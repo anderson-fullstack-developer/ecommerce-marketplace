@@ -53,6 +53,7 @@ export default async function AdminVendorsPage() {
               <TableRow>
                 <TableHead>Fornecedor</TableHead>
                 <TableHead>Valor</TableHead>
+                <TableHead>Pagamento</TableHead>
                 <TableHead>Pedido em</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
@@ -62,6 +63,20 @@ export default async function AdminVendorsPage() {
                 <TableRow key={request.id}>
                   <TableCell>{request.vendor.name}</TableCell>
                   <TableCell>€{request.amount.toFixed(2)}</TableCell>
+                  <TableCell>
+                    {request.paymentMethod ? (
+                      <>
+                        <div className="font-medium">
+                          {request.paymentMethod === "IBAN" ? "IBAN" : "MB WAY"}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {request.paymentDetails}
+                        </div>
+                      </>
+                    ) : (
+                      "—"
+                    )}
+                  </TableCell>
                   <TableCell>{request.createdAt.toLocaleDateString("pt-PT")}</TableCell>
                   <TableCell className="text-right">
                     <WithdrawalActions requestId={request.id} />
@@ -70,7 +85,7 @@ export default async function AdminVendorsPage() {
               ))}
               {pendingWithdrawals.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center text-muted-foreground">
                     Sem pedidos de levantamento pendentes.
                   </TableCell>
                 </TableRow>

@@ -123,12 +123,19 @@ enum WithdrawalStatus {
   PAID
 }
 
+enum WithdrawalPaymentMethod {
+  IBAN
+  MBWAY
+}
+
 model WithdrawalRequest {
-  id        String           @id @default(cuid())
-  vendorId  String
-  vendor    Vendor           @relation(fields: [vendorId], references: [id])
-  amount    Float
-  status    WithdrawalStatus @default(PENDING)
-  createdAt DateTime         @default(now())
-  paidAt    DateTime?
+  id             String                   @id @default(cuid())
+  vendorId       String
+  vendor         Vendor                   @relation(fields: [vendorId], references: [id])
+  amount         Float
+  paymentMethod  WithdrawalPaymentMethod?
+  paymentDetails String?
+  status         WithdrawalStatus         @default(PENDING)
+  createdAt      DateTime                 @default(now())
+  paidAt         DateTime?
 }
