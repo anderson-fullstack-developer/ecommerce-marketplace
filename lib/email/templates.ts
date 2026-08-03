@@ -226,6 +226,20 @@ export function vendorApprovedEmail(params: {
   };
 }
 
+export function passwordResetEmail(params: { name: string; resetUrl: string }) {
+  const body = `
+    <p style="margin:0 0 12px;font-size:15px;">Olá <strong>${escapeHtml(params.name)}</strong>,</p>
+    <p style="margin:0 0 12px;font-size:15px;">Recebemos um pedido para repor a tua password. Se foste tu, clica no botão abaixo para escolher uma password nova. Este link expira dentro de 1 hora.</p>
+    ${ctaButton("Repor password →", params.resetUrl)}
+    <p style="margin:16px 0 0;font-size:13px;color:${COLORS.muted};">Se não pediste isto, ignora este email — a tua password mantém-se inalterada.</p>
+    ${signOff()}
+  `;
+  return {
+    subject: "Repor a tua password — Neto STP",
+    html: emailShell("Repor password", body),
+  };
+}
+
 export function contactMessageEmail(params: { name: string; email: string; message: string }) {
   const body = `
     <p style="margin:0 0 12px;font-size:15px;">Nova mensagem recebida através do formulário de contacto.</p>

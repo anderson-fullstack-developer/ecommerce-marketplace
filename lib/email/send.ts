@@ -5,6 +5,7 @@ import {
   newVendorApplicationAdminEmail,
   orderConfirmationEmail,
   orderStatusUpdateEmail,
+  passwordResetEmail,
   vendorApplicationReceivedEmail,
   vendorApprovedEmail,
   vendorHelpMessageAdminEmail,
@@ -140,6 +141,15 @@ export async function sendVendorRejectedEmail(params: {
 }) {
   const { subject, html } = vendorRejectedEmail(params);
   await sendEmail({ to: [{ email: params.vendorEmail, name: params.vendorName }], subject, html });
+}
+
+export async function sendPasswordResetEmail(params: {
+  name: string;
+  email: string;
+  resetUrl: string;
+}) {
+  const { subject, html } = passwordResetEmail({ name: params.name, resetUrl: params.resetUrl });
+  await sendEmail({ to: [{ email: params.email, name: params.name }], subject, html });
 }
 
 export async function sendContactMessageEmail(params: {

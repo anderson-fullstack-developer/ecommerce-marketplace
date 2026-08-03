@@ -38,7 +38,10 @@ export const authConfig = {
       }
 
       if (pathname.startsWith("/fornecedor")) {
-        const isLoginPage = pathname === "/fornecedor/login";
+        const isLoginPage =
+          pathname === "/fornecedor/login" ||
+          pathname === "/fornecedor/recuperar" ||
+          pathname.startsWith("/fornecedor/redefinir/");
 
         if (isLoginPage) {
           if (isLoggedIn && role === "VENDOR") {
@@ -52,7 +55,11 @@ export const authConfig = {
       }
 
       if (pathname.startsWith("/conta")) {
-        const isPublicPage = pathname === "/conta/login" || pathname === "/conta/registar";
+        const isPublicPage =
+          pathname === "/conta/login" ||
+          pathname === "/conta/registar" ||
+          pathname === "/conta/recuperar" ||
+          pathname.startsWith("/conta/redefinir/");
 
         if (isPublicPage) {
           if (isLoggedIn && role === "CUSTOMER") {
