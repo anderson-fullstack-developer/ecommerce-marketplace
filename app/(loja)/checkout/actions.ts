@@ -5,6 +5,7 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getStripe } from "@/lib/stripe";
+import { calculateShipping } from "@/lib/shipping";
 
 const checkoutInputSchema = z
   .array(
@@ -54,11 +55,26 @@ export async function createCheckoutSession(input: unknown) {
     };
   });
 
+  const subtotal = items.reduce((sum, item) => {
+    const product = products.find((p) => p.id === item.productId)!;
+    return sum + product.price * item.quantity;
+  }, 0);
+  const shippingAmount = calculateShipping(subtotal);
+
   const origin = (await headers()).get("origin") ?? "http://localhost:3000";
 
   const checkoutSession = await getStripe().checkout.sessions.create({
     mode: "payment",
     line_items: lineItems,
+    shipping_options: [
+      {
+        shipping_rate_data: {
+          type: "fixed_amount",
+          fixed_amount: { amount: Math.round(shippingAmount * 100), currency: "eur" },
+          display_name: shippingAmount === 0 ? "Envio grátis" : "Envio",
+        },
+      },
+    ],
     success_url: `${origin}/sucesso?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}/carrinho`,
     customer_email: session.user.email,

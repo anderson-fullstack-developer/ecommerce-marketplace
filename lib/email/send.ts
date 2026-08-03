@@ -22,6 +22,7 @@ export async function sendOrderConfirmationEmail(params: {
   customerEmail: string;
   orderId: string;
   items: OrderEmailItem[];
+  shippingAmount: number;
   total: number;
   siteUrl: string;
 }) {
@@ -58,6 +59,7 @@ export async function sendNewOrderAdminEmail(params: {
   postalCode: string;
   country: string;
   items: OrderEmailItem[];
+  shippingAmount: number;
   total: number;
   siteUrl: string;
 }) {

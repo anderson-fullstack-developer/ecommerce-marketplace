@@ -95,6 +95,7 @@ model Order {
   customer        Customer    @relation(fields: [customerId], references: [id])
   stripePaymentId String?     @unique
   total           Float
+  shippingAmount  Float       @default(0)
   status          OrderStatus @default(PENDING)
   items           OrderItem[]
   createdAt       DateTime    @default(now())

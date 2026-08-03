@@ -5,11 +5,14 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
+import { calculateShipping, FREE_SHIPPING_THRESHOLD } from "@/lib/shipping";
 import { createCheckoutSession } from "./actions";
 
 export default function CheckoutPage() {
   const { items, subtotal } = useCart();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const shipping = calculateShipping(subtotal);
+  const total = subtotal + shipping;
 
   async function handleCheckout() {
     setIsSubmitting(true);
@@ -59,9 +62,25 @@ export default function CheckoutPage() {
         ))}
       </ul>
 
-      <div className="mt-6 flex items-center justify-between border-t border-border pt-6 text-lg font-semibold">
+      <div className="mt-6 space-y-1 border-t border-border pt-6 text-sm">
+        <div className="flex items-center justify-between text-muted-foreground">
+          <span>Subtotal</span>
+          <span>€{subtotal.toFixed(2)}</span>
+        </div>
+        <div className="flex items-center justify-between text-muted-foreground">
+          <span>Envio</span>
+          <span>{shipping === 0 ? "Grátis" : `€${shipping.toFixed(2)}`}</span>
+        </div>
+        {shipping > 0 && (
+          <p className="text-xs text-muted-foreground">
+            Envio grátis a partir de €{FREE_SHIPPING_THRESHOLD.toFixed(2)}.
+          </p>
+        )}
+      </div>
+
+      <div className="mt-2 flex items-center justify-between border-t border-border pt-4 text-lg font-semibold">
         <span>Total</span>
-        <span>€{subtotal.toFixed(2)}</span>
+        <span>€{total.toFixed(2)}</span>
       </div>
 
       <p className="mt-2 text-xs text-muted-foreground">

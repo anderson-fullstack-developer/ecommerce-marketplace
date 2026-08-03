@@ -117,12 +117,15 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, siteUrl
       })
     : await prisma.customer.create({ data: customerData });
 
-  const total = orderItemsData.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const productsTotal = orderItemsData.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const shippingAmount = (session.shipping_cost?.amount_total ?? 0) / 100;
+  const total = (session.amount_total ?? 0) / 100 || productsTotal + shippingAmount;
 
   const [order] = await prisma.$transaction([
     prisma.order.create({
       data: {
         customerId: customer.id,
+        shippingAmount,
         stripePaymentId: paymentIntentId,
         total,
         status: "PAID",
@@ -150,6 +153,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, siteUrl
         customerEmail: customer.email,
         orderId: order.id,
         items: emailItems,
+        shippingAmount,
         total,
         siteUrl,
       });
@@ -165,6 +169,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, siteUrl
       postalCode: customer.postalCode,
       country: customer.country,
       items: emailItems,
+      shippingAmount,
       total,
       siteUrl,
     });

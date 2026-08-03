@@ -54,7 +54,11 @@ export default async function CustomerOrderDetailPage({
               </li>
             ))}
           </ul>
-          <p className="mt-4 flex justify-between border-t border-border pt-2 font-semibold">
+          <p className="mt-4 flex justify-between border-t border-border pt-2 text-sm text-muted-foreground">
+            <span>Envio</span>
+            <span>{order.shippingAmount === 0 ? "Grátis" : `€${order.shippingAmount.toFixed(2)}`}</span>
+          </p>
+          <p className="mt-1 flex justify-between font-semibold">
             <span>Total</span>
             <span>€{order.total.toFixed(2)}</span>
           </p>

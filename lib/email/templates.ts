@@ -67,7 +67,7 @@ function emailShell(heading: string, bodyHtml: string) {
 </html>`;
 }
 
-function summaryTable(items: OrderEmailItem[], total: number) {
+function summaryTable(items: OrderEmailItem[], total: number, shippingAmount?: number) {
   const rows = items
     .map(
       (item) => `
@@ -78,10 +78,19 @@ function summaryTable(items: OrderEmailItem[], total: number) {
     )
     .join("");
 
+  const shippingRow =
+    shippingAmount !== undefined
+      ? `<tr>
+          <td style="padding:10px 16px;font-size:14px;">Envio</td>
+          <td style="padding:10px 16px;font-size:14px;text-align:right;white-space:nowrap;">${shippingAmount === 0 ? "Grátis" : `€${shippingAmount.toFixed(2)}`}</td>
+        </tr>`
+      : "";
+
   return `
     <table role="presentation" width="100%" style="border-collapse:collapse;background-color:${COLORS.surface};border-radius:8px;overflow:hidden;margin:20px 0;font-size:14px;">
       <tbody>
         ${rows}
+        ${shippingRow}
         <tr>
           <td style="padding:12px 16px;font-weight:bold;border-top:1px solid ${COLORS.border};">Total</td>
           <td style="padding:12px 16px;font-weight:bold;text-align:right;border-top:1px solid ${COLORS.border};">€${total.toFixed(2)}</td>
@@ -114,6 +123,7 @@ export function orderConfirmationEmail(params: {
   customerName: string;
   orderId: string;
   items: OrderEmailItem[];
+  shippingAmount: number;
   total: number;
   siteUrl: string;
 }) {
@@ -121,7 +131,7 @@ export function orderConfirmationEmail(params: {
   const body = `
     <p style="margin:0 0 12px;font-size:15px;">Olá <strong>${params.customerName}</strong>,</p>
     <p style="margin:0 0 12px;font-size:15px;">Obrigado pela tua compra! Recebemos o teu pagamento e a tua encomenda já está a ser preparada.</p>
-    ${summaryTable(params.items, params.total)}
+    ${summaryTable(params.items, params.total, params.shippingAmount)}
     ${highlightNote("Número da encomenda:", `#${ref}`)}
     <p style="margin:0 0 8px;font-size:15px;">Vamos avisar-te por email assim que a encomenda for enviada.</p>
     ${ctaButton("Ver a loja →", `${params.siteUrl}/loja`)}
@@ -164,13 +174,14 @@ export function newOrderAdminEmail(params: {
   postalCode: string;
   country: string;
   items: OrderEmailItem[];
+  shippingAmount: number;
   total: number;
   siteUrl: string;
 }) {
   const ref = orderReference(params.orderId);
   const body = `
     <p style="margin:0 0 12px;font-size:15px;">Nova encomenda paga.</p>
-    ${summaryTable(params.items, params.total)}
+    ${summaryTable(params.items, params.total, params.shippingAmount)}
     ${highlightNote("Número da encomenda:", `#${ref}`)}
 
     <h2 style="margin:24px 0 8px;font-size:15px;">Dados para envio</h2>
