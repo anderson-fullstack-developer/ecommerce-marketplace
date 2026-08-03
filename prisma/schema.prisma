@@ -105,14 +105,16 @@ enum VendorStatus {
 }
 
 model Vendor {
-  id        String              @id @default(cuid())
-  name      String
-  email     String              @unique
-  password  String
-  phone     String
-  message   String?
-  status    VendorStatus        @default(PENDING)
-  createdAt DateTime            @default(now())
+  id          String              @id @default(cuid())
+  name        String
+  email       String              @unique
+  password    String
+  phone       String
+  nif         String?
+  documentUrl String?
+  message     String?
+  status      VendorStatus        @default(PENDING)
+  createdAt   DateTime            @default(now())
   products  Product[]
   orderItems       OrderItem[]
   withdrawals      WithdrawalRequest[]

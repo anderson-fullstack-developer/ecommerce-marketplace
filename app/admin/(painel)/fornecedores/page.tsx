@@ -105,6 +105,8 @@ export default async function AdminVendorsPage() {
               <TableRow>
                 <TableHead>Nome</TableHead>
                 <TableHead>Contacto</TableHead>
+                <TableHead>NIF</TableHead>
+                <TableHead>Documento</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead>Data</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
@@ -118,6 +120,21 @@ export default async function AdminVendorsPage() {
                     <div>{vendor.email}</div>
                     <div className="text-xs text-muted-foreground">{vendor.phone}</div>
                   </TableCell>
+                  <TableCell>{vendor.nif ?? "—"}</TableCell>
+                  <TableCell>
+                    {vendor.documentUrl ? (
+                      <a
+                        href={vendor.documentUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                      >
+                        Ver documento
+                      </a>
+                    ) : (
+                      "—"
+                    )}
+                  </TableCell>
                   <TableCell>{STATUS_LABELS[vendor.status] ?? vendor.status}</TableCell>
                   <TableCell>{vendor.createdAt.toLocaleDateString("pt-PT")}</TableCell>
                   <TableCell className="text-right">
@@ -129,7 +146,7 @@ export default async function AdminVendorsPage() {
               ))}
               {vendors.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center text-muted-foreground">
                     Ainda não há candidaturas.
                   </TableCell>
                 </TableRow>

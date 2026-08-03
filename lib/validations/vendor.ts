@@ -5,6 +5,8 @@ export const vendorApplicationSchema = z.object({
   email: z.email("Email inválido"),
   password: z.string().min(8, "A password deve ter pelo menos 8 caracteres"),
   phone: z.string().min(1, "Telefone obrigatório"),
+  nif: z.string().min(9, "NIF inválido — deve ter 9 dígitos"),
+  documentUrl: z.url("URL de documento inválido").optional().or(z.literal("")),
   message: z.string().optional(),
 });
 
