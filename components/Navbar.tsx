@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { User } from "lucide-react";
 import { auth } from "@/auth";
 import { CartLink } from "@/components/CartLink";
 
@@ -33,9 +34,11 @@ export async function Navbar() {
           </Link>
           <Link
             href={isCustomer ? "/conta/encomendas" : "/conta/login"}
-            className="hidden hover:text-primary sm:inline"
+            className="flex items-center hover:text-primary"
+            aria-label={isCustomer ? "As minhas encomendas" : "Entrar ou criar conta"}
+            title={isCustomer ? "As minhas encomendas" : "Entrar ou criar conta"}
           >
-            {isCustomer ? "As minhas encomendas" : "Entrar"}
+            <User className="size-5" />
           </Link>
           <CartLink />
         </nav>

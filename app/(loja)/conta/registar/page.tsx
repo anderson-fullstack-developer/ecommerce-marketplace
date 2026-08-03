@@ -18,7 +18,8 @@ import { registerCustomer } from "./actions";
 function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/conta/encomendas";
+  const explicitCallbackUrl = searchParams.get("callbackUrl");
+  const callbackUrl = explicitCallbackUrl || "/conta/encomendas";
   const [formError, setFormError] = useState<string | null>(null);
 
   const {
@@ -51,7 +52,11 @@ function RegisterForm() {
       return;
     }
 
-    router.push(callbackUrl);
+    if (explicitCallbackUrl) {
+      router.push(explicitCallbackUrl);
+    } else {
+      router.push("/?bemvindo=1");
+    }
     router.refresh();
   }
 
