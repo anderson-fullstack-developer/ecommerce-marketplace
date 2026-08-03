@@ -106,7 +106,11 @@ export async function sendVendorApprovedEmail(params: {
   vendorEmail: string;
   siteUrl: string;
 }) {
-  const { subject, html } = vendorApprovedEmail(params);
+  const { subject, html } = vendorApprovedEmail({
+    vendorName: params.vendorName,
+    vendorEmail: params.vendorEmail,
+    siteUrl: params.siteUrl,
+  });
   await sendEmail({ to: [{ email: params.vendorEmail, name: params.vendorName }], subject, html });
 }
 

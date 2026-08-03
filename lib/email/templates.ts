@@ -205,10 +205,18 @@ export function vendorApplicationReceivedEmail(params: { vendorName: string; sit
   };
 }
 
-export function vendorApprovedEmail(params: { vendorName: string; siteUrl: string }) {
+export function vendorApprovedEmail(params: {
+  vendorName: string;
+  vendorEmail: string;
+  siteUrl: string;
+}) {
   const body = `
     <p style="margin:0 0 12px;font-size:15px;">Olá <strong>${params.vendorName}</strong>,</p>
     <p style="margin:0 0 12px;font-size:15px;">Boas notícias! A tua candidatura para vender na Neto STP foi <strong>aprovada</strong>. Já podes entrar no painel de fornecedor e começar a adicionar os teus produtos.</p>
+    <table role="presentation" width="100%" style="font-size:14px;line-height:1.7;margin:16px 0;background-color:${COLORS.surface};border-radius:8px;">
+      <tr><td style="padding:12px 16px;color:${COLORS.muted};width:90px;">Email</td><td style="padding:12px 16px;">${escapeHtml(params.vendorEmail)}</td></tr>
+      <tr><td style="padding:0 16px 12px;color:${COLORS.muted};">Password</td><td style="padding:0 16px 12px;">a que definiste na candidatura</td></tr>
+    </table>
     ${ctaButton("Entrar no painel →", `${params.siteUrl}/fornecedor/login`)}
     ${signOff()}
   `;
