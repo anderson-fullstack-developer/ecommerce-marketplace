@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -36,6 +35,22 @@ export function StoreFilters({
     if (values.sort) params.set("sort", values.sort);
     router.push(`/loja?${params.toString()}`);
   }
+
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      applyFilters({ q });
+    }, 400);
+
+    return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q]);
 
   return (
     <form
@@ -90,8 +105,6 @@ export function StoreFilters({
           <SelectItem value="price-desc">Preço: maior primeiro</SelectItem>
         </SelectContent>
       </Select>
-
-      <Button type="submit">Pesquisar</Button>
     </form>
   );
 }
