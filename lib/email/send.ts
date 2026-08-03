@@ -2,11 +2,13 @@ import { sendEmail } from "./brevo";
 import {
   contactMessageEmail,
   newOrderAdminEmail,
+  newVendorApplicationAdminEmail,
   orderConfirmationEmail,
   orderStatusUpdateEmail,
   vendorApplicationReceivedEmail,
   vendorApprovedEmail,
   vendorRejectedEmail,
+  vendorSaleEmail,
   type OrderEmailItem,
 } from "./templates";
 
@@ -61,6 +63,33 @@ export async function sendNewOrderAdminEmail(params: {
 
   const { subject, html } = newOrderAdminEmail(params);
   await sendEmail({ to: [{ email: adminEmail }], subject, html });
+}
+
+export async function sendNewVendorApplicationAdminEmail(params: {
+  vendorName: string;
+  vendorEmail: string;
+  vendorPhone: string;
+  nif?: string | null;
+  documentUrl?: string | null;
+  siteUrl: string;
+}) {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (!adminEmail) return;
+
+  const { subject, html } = newVendorApplicationAdminEmail(params);
+  await sendEmail({ to: [{ email: adminEmail }], subject, html });
+}
+
+export async function sendVendorSaleEmail(params: {
+  vendorName: string;
+  vendorEmail: string;
+  orderId: string;
+  items: OrderEmailItem[];
+  vendorAmount: number;
+  siteUrl: string;
+}) {
+  const { subject, html } = vendorSaleEmail(params);
+  await sendEmail({ to: [{ email: params.vendorEmail, name: params.vendorName }], subject, html });
 }
 
 export async function sendVendorApplicationReceivedEmail(params: {

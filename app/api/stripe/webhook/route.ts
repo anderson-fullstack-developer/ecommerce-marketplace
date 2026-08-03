@@ -4,7 +4,11 @@ import { prisma } from "@/lib/prisma";
 import { getStripe } from "@/lib/stripe";
 import { getCommissionRate } from "@/lib/commission";
 import { getSiteUrl } from "@/lib/site-url";
-import { sendNewOrderAdminEmail, sendOrderConfirmationEmail } from "@/lib/email/send";
+import {
+  sendNewOrderAdminEmail,
+  sendOrderConfirmationEmail,
+  sendVendorSaleEmail,
+} from "@/lib/email/send";
 
 export async function POST(request: Request) {
   const body = await request.text();
@@ -69,9 +73,14 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, siteUrl
 
   const products = await prisma.product.findMany({
     where: { id: { in: lineItemsData.map((item) => item.productId) } },
-    select: { id: true, vendorId: true },
+    select: { id: true, vendorId: true, vendor: { select: { name: true, email: true } } },
   });
   const vendorByProductId = new Map(products.map((product) => [product.id, product.vendorId]));
+  const vendorInfoById = new Map(
+    products
+      .filter((product) => product.vendorId && product.vendor)
+      .map((product) => [product.vendorId as string, product.vendor!])
+  );
   const commissionRate = getCommissionRate();
 
   const orderItemsData = lineItemsData.map(({ productId, quantity, price }) => {
@@ -161,5 +170,31 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, siteUrl
     });
   } catch (error) {
     console.error("Falha ao enviar emails de confirmação de encomenda:", error);
+  }
+
+  const vendorIds = [...new Set(orderItemsData.map((item) => item.vendorId).filter(Boolean))] as string[];
+
+  for (const vendorId of vendorIds) {
+    const vendorInfo = vendorInfoById.get(vendorId);
+    if (!vendorInfo) continue;
+
+    const vendorItems = orderItemsData
+      .map((item, index) => ({ ...item, ...lineItemsData[index] }))
+      .filter((item) => item.vendorId === vendorId);
+
+    const vendorAmount = vendorItems.reduce((sum, item) => sum + (item.vendorAmount ?? 0), 0);
+
+    try {
+      await sendVendorSaleEmail({
+        vendorName: vendorInfo.name,
+        vendorEmail: vendorInfo.email,
+        orderId: order.id,
+        items: vendorItems.map((item) => ({ name: item.name, quantity: item.quantity, price: item.price })),
+        vendorAmount,
+        siteUrl,
+      });
+    } catch (error) {
+      console.error("Falha ao enviar email de venda ao fornecedor:", error);
+    }
   }
 }

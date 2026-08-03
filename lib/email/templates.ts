@@ -234,6 +234,56 @@ export function contactMessageEmail(params: { name: string; email: string; messa
   };
 }
 
+export function newVendorApplicationAdminEmail(params: {
+  vendorName: string;
+  vendorEmail: string;
+  vendorPhone: string;
+  nif?: string | null;
+  documentUrl?: string | null;
+  siteUrl: string;
+}) {
+  const body = `
+    <p style="margin:0 0 12px;font-size:15px;">Nova candidatura de fornecedor.</p>
+    <table role="presentation" width="100%" style="font-size:14px;line-height:1.7;margin:16px 0;">
+      <tr><td style="color:${COLORS.muted};width:90px;">Nome</td><td>${escapeHtml(params.vendorName)}</td></tr>
+      <tr><td style="color:${COLORS.muted};">Email</td><td>${escapeHtml(params.vendorEmail)}</td></tr>
+      <tr><td style="color:${COLORS.muted};">Telefone</td><td>${escapeHtml(params.vendorPhone || "—")}</td></tr>
+      <tr><td style="color:${COLORS.muted};">NIF</td><td>${escapeHtml(params.nif || "—")}</td></tr>
+      <tr><td style="color:${COLORS.muted};">Documento</td><td>${params.documentUrl ? `<a href="${params.documentUrl}" style="color:${COLORS.primary};">Ver documento</a>` : "—"}</td></tr>
+    </table>
+    ${ctaButton("Rever candidatura →", `${params.siteUrl}/admin/fornecedores`)}
+  `;
+  return {
+    subject: `Nova candidatura de fornecedor — ${params.vendorName}`,
+    html: emailShell("Nova candidatura de fornecedor", body),
+  };
+}
+
+export function vendorSaleEmail(params: {
+  vendorName: string;
+  orderId: string;
+  items: OrderEmailItem[];
+  vendorAmount: number;
+  siteUrl: string;
+}) {
+  const ref = orderReference(params.orderId);
+  const grossTotal = params.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const body = `
+    <p style="margin:0 0 12px;font-size:15px;">Olá <strong>${params.vendorName}</strong>,</p>
+    <p style="margin:0 0 12px;font-size:15px;">Boas notícias! Um dos teus produtos acabou de ser vendido.</p>
+    ${summaryTable(params.items, grossTotal)}
+    ${highlightNote("Número da encomenda:", `#${ref}`)}
+    ${highlightNote("Valor que vais receber (comissão já descontada):", `€${params.vendorAmount.toFixed(2)}`)}
+    <p style="margin:0 0 8px;font-size:15px;">Esse valor já está disponível no teu saldo.</p>
+    ${ctaButton("Ver o meu saldo →", `${params.siteUrl}/fornecedor/saldo`)}
+    ${signOff()}
+  `;
+  return {
+    subject: "Vendeste um produto na Neto STP!",
+    html: emailShell("Novo produto vendido", body),
+  };
+}
+
 export function vendorRejectedEmail(params: { vendorName: string; siteUrl: string }) {
   const body = `
     <p style="margin:0 0 12px;font-size:15px;">Olá <strong>${params.vendorName}</strong>,</p>

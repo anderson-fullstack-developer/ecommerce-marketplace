@@ -5,7 +5,10 @@ import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { getSiteUrl } from "@/lib/site-url";
 import { cloudinary } from "@/lib/cloudinary";
-import { sendVendorApplicationReceivedEmail } from "@/lib/email/send";
+import {
+  sendNewVendorApplicationAdminEmail,
+  sendVendorApplicationReceivedEmail,
+} from "@/lib/email/send";
 import {
   vendorApplicationSchema,
   type VendorApplicationInput,
@@ -63,8 +66,9 @@ export async function applyAsVendor(input: VendorApplicationInput) {
     },
   });
 
+  const siteUrl = getSiteUrl((await headers()).get("origin"));
+
   try {
-    const siteUrl = getSiteUrl((await headers()).get("origin"));
     await sendVendorApplicationReceivedEmail({
       vendorName: data.name,
       vendorEmail: data.email,
@@ -72,5 +76,18 @@ export async function applyAsVendor(input: VendorApplicationInput) {
     });
   } catch (error) {
     console.error("Falha ao enviar email de candidatura recebida:", error);
+  }
+
+  try {
+    await sendNewVendorApplicationAdminEmail({
+      vendorName: data.name,
+      vendorEmail: data.email,
+      vendorPhone: data.phone,
+      nif: data.nif,
+      documentUrl: data.documentUrl,
+      siteUrl,
+    });
+  } catch (error) {
+    console.error("Falha ao enviar email de nova candidatura ao admin:", error);
   }
 }
