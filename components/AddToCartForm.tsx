@@ -20,7 +20,7 @@ export function AddToCartForm({ product }: { product: Product }) {
   const outOfStock = product.stock <= 0;
 
   function handleAdd() {
-    addItem(
+    const result = addItem(
       {
         productId: product.id,
         slug: product.slug,
@@ -31,6 +31,15 @@ export function AddToCartForm({ product }: { product: Product }) {
       },
       quantity
     );
+
+    if (result === "maxed") {
+      toast.error(`Já tens o máximo em stock de "${product.name}" no carrinho (${product.stock}).`);
+      return;
+    }
+    if (result === "capped") {
+      toast.warning(`Só há ${product.stock} unidades de "${product.name}" em stock.`);
+      return;
+    }
     toast.success(`${product.name} adicionado ao carrinho`);
   }
 

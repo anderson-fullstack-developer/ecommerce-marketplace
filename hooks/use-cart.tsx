@@ -18,9 +18,11 @@ export type CartItem = {
   quantity: number;
 };
 
+export type AddItemResult = "ok" | "capped" | "maxed";
+
 type CartContextValue = {
   items: CartItem[];
-  addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
+  addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => AddItemResult;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clear: () => void;
@@ -51,17 +53,28 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   }, [items, hydrated]);
 
-  function addItem(item: Omit<CartItem, "quantity">, quantity = 1) {
+  function addItem(item: Omit<CartItem, "quantity">, quantity = 1): AddItemResult {
+    const existing = items.find((i) => i.productId === item.productId);
+    const currentQuantity = existing?.quantity ?? 0;
+
+    if (currentQuantity >= item.stock) {
+      return "maxed";
+    }
+
+    const nextQuantity = Math.min(currentQuantity + quantity, item.stock);
+    const result: AddItemResult = nextQuantity < currentQuantity + quantity ? "capped" : "ok";
+
     setItems((current) => {
-      const existing = current.find((i) => i.productId === item.productId);
-      if (existing) {
-        const nextQuantity = Math.min(existing.quantity + quantity, item.stock);
+      const currentExisting = current.find((i) => i.productId === item.productId);
+      if (currentExisting) {
         return current.map((i) =>
           i.productId === item.productId ? { ...i, quantity: nextQuantity } : i
         );
       }
-      return [...current, { ...item, quantity: Math.min(quantity, item.stock) }];
+      return [...current, { ...item, quantity: nextQuantity }];
     });
+
+    return result;
   }
 
   function removeItem(productId: string) {
