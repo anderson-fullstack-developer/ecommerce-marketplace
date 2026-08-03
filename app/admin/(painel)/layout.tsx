@@ -9,6 +9,7 @@ const navItems = [
   { href: "/admin/categorias", label: "Categorias" },
   { href: "/admin/encomendas", label: "Encomendas" },
   { href: "/admin/fornecedores", label: "Fornecedores" },
+  { href: "/admin/candidaturas", label: "Candidaturas" },
 ];
 
 export default async function AdminPanelLayout({

@@ -12,6 +12,7 @@ export async function approveVendor(vendorId: string) {
     data: { status: "APPROVED" },
   });
   revalidatePath("/admin/fornecedores");
+  revalidatePath("/admin/candidaturas");
 
   try {
     const siteUrl = getSiteUrl((await headers()).get("origin"));
@@ -27,6 +28,7 @@ export async function rejectVendor(vendorId: string) {
     data: { status: "REJECTED" },
   });
   revalidatePath("/admin/fornecedores");
+  revalidatePath("/admin/candidaturas");
 
   try {
     const siteUrl = getSiteUrl((await headers()).get("origin"));

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import {
   Card,
@@ -14,18 +15,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { VendorActions } from "@/components/admin/VendorActions";
 import { WithdrawalActions } from "@/components/admin/WithdrawalActions";
-
-const STATUS_LABELS: Record<string, string> = {
-  PENDING: "Pendente",
-  APPROVED: "Aprovado",
-  REJECTED: "Rejeitado",
-};
 
 export default async function AdminVendorsPage() {
   const [vendors, pendingWithdrawals] = await Promise.all([
-    prisma.vendor.findMany({ orderBy: { createdAt: "desc" } }),
+    prisma.vendor.findMany({
+      where: { status: "APPROVED" },
+      orderBy: { createdAt: "desc" },
+      include: { _count: { select: { products: true } } },
+    }),
     prisma.withdrawalRequest.findMany({
       where: { status: "PENDING" },
       include: { vendor: true },
@@ -38,7 +36,8 @@ export default async function AdminVendorsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Fornecedores</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Candidaturas de vendedores, aprovação e pedidos de levantamento.
+          Fornecedores já aprovados e pedidos de levantamento. Candidaturas por decidir estão
+          em "Candidaturas".
         </p>
       </div>
 
@@ -97,7 +96,7 @@ export default async function AdminVendorsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Candidaturas</CardTitle>
+          <CardTitle>Fornecedores ({vendors.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
@@ -106,9 +105,8 @@ export default async function AdminVendorsPage() {
                 <TableHead>Nome</TableHead>
                 <TableHead>Contacto</TableHead>
                 <TableHead>NIF</TableHead>
-                <TableHead>Documento</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Data</TableHead>
+                <TableHead>Produtos</TableHead>
+                <TableHead>Fornecedor desde</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -121,33 +119,22 @@ export default async function AdminVendorsPage() {
                     <div className="text-xs text-muted-foreground">{vendor.phone}</div>
                   </TableCell>
                   <TableCell>{vendor.nif ?? "—"}</TableCell>
-                  <TableCell>
-                    {vendor.documentUrl ? (
-                      <a
-                        href={vendor.documentUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
-                        Ver documento
-                      </a>
-                    ) : (
-                      "—"
-                    )}
-                  </TableCell>
-                  <TableCell>{STATUS_LABELS[vendor.status] ?? vendor.status}</TableCell>
+                  <TableCell>{vendor._count.products}</TableCell>
                   <TableCell>{vendor.createdAt.toLocaleDateString("pt-PT")}</TableCell>
                   <TableCell className="text-right">
-                    {vendor.status === "PENDING" ? (
-                      <VendorActions vendorId={vendor.id} />
-                    ) : null}
+                    <Link
+                      href={`/admin/fornecedores/${vendor.id}`}
+                      className="text-sm text-primary hover:underline"
+                    >
+                      Ver
+                    </Link>
                   </TableCell>
                 </TableRow>
               ))}
               {vendors.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground">
-                    Ainda não há candidaturas.
+                  <TableCell colSpan={6} className="text-center text-muted-foreground">
+                    Ainda não há fornecedores aprovados.
                   </TableCell>
                 </TableRow>
               )}
