@@ -1,13 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 import { SignOutButton } from "@/components/admin/SignOutButton";
-
-const navItems = [
-  { href: "/fornecedor/painel", label: "Painel" },
-  { href: "/fornecedor/produtos", label: "Produtos" },
-  { href: "/fornecedor/saldo", label: "Saldo" },
-];
 
 export default async function VendorPanelLayout({
   children,
@@ -15,6 +10,19 @@ export default async function VendorPanelLayout({
   children: React.ReactNode;
 }) {
   const session = await auth();
+  const vendorId = session!.user.id;
+
+  const newOrderItems = await prisma.orderItem.findMany({
+    where: { vendorId, order: { status: "PAID" } },
+    select: { orderId: true },
+    distinct: ["orderId"],
+  });
+
+  const navItems = [
+    { href: "/fornecedor/painel", label: "Painel", badge: newOrderItems.length },
+    { href: "/fornecedor/produtos", label: "Produtos" },
+    { href: "/fornecedor/saldo", label: "Saldo" },
+  ];
 
   return (
     <div className="flex min-h-screen">
@@ -37,9 +45,14 @@ export default async function VendorPanelLayout({
             <Link
               key={item.href}
               href={item.href}
-              className="block rounded-md px-3 py-2 text-sm hover:bg-muted"
+              className="flex items-center justify-between rounded-md px-3 py-2 text-sm hover:bg-muted"
             >
-              {item.label}
+              <span>{item.label}</span>
+              {!!item.badge && (
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-medium text-primary-foreground">
+                  {item.badge}
+                </span>
+              )}
             </Link>
           ))}
         </nav>

@@ -1,16 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 import { SignOutButton } from "@/components/admin/SignOutButton";
-
-const navItems = [
-  { href: "/admin/dashboard", label: "Dashboard" },
-  { href: "/admin/produtos", label: "Produtos" },
-  { href: "/admin/categorias", label: "Categorias" },
-  { href: "/admin/encomendas", label: "Encomendas" },
-  { href: "/admin/fornecedores", label: "Fornecedores" },
-  { href: "/admin/candidaturas", label: "Candidaturas" },
-];
 
 export default async function AdminPanelLayout({
   children,
@@ -18,6 +10,24 @@ export default async function AdminPanelLayout({
   children: React.ReactNode;
 }) {
   const session = await auth();
+
+  const [pendingProducts, newOrders, pendingApplications, pendingWithdrawals] =
+    await Promise.all([
+      prisma.product.count({ where: { approvalStatus: "PENDING" } }),
+      prisma.order.count({ where: { status: "PAID" } }),
+      prisma.vendor.count({ where: { status: "PENDING" } }),
+      prisma.withdrawalRequest.count({ where: { status: "PENDING" } }),
+    ]);
+
+  const navItems = [
+    { href: "/admin/dashboard", label: "Dashboard" },
+    { href: "/admin/produtos", label: "Produtos", badge: pendingProducts },
+    { href: "/admin/categorias", label: "Categorias" },
+    { href: "/admin/encomendas", label: "Encomendas", badge: newOrders },
+    { href: "/admin/fornecedores", label: "Fornecedores" },
+    { href: "/admin/candidaturas", label: "Candidaturas", badge: pendingApplications },
+    { href: "/admin/levantamentos", label: "Levantamentos", badge: pendingWithdrawals },
+  ];
 
   return (
     <div className="flex min-h-screen">
@@ -40,9 +50,14 @@ export default async function AdminPanelLayout({
             <Link
               key={item.href}
               href={item.href}
-              className="block rounded-md px-3 py-2 text-sm hover:bg-muted"
+              className="flex items-center justify-between rounded-md px-3 py-2 text-sm hover:bg-muted"
             >
-              {item.label}
+              <span>{item.label}</span>
+              {!!item.badge && (
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-medium text-primary-foreground">
+                  {item.badge}
+                </span>
+              )}
             </Link>
           ))}
         </nav>

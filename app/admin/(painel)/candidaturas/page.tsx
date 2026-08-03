@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import type { VendorStatus } from "@/lib/generated/prisma/enums";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -9,6 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { VendorActions } from "@/components/admin/VendorActions";
+import { CandidaturaFilters } from "@/components/admin/CandidaturaFilters";
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: "Pendente",
@@ -16,9 +18,19 @@ const STATUS_LABELS: Record<string, string> = {
   REJECTED: "Rejeitado",
 };
 
-export default async function AdminCandidaturasPage() {
+const VALID_STATUSES = Object.keys(STATUS_LABELS);
+
+export default async function AdminCandidaturasPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
+  const { status } = await searchParams;
+  const statusFilter =
+    status && VALID_STATUSES.includes(status) ? (status as VendorStatus) : undefined;
+
   const applications = await prisma.vendor.findMany({
-    where: { status: { not: "APPROVED" } },
+    where: statusFilter ? { status: statusFilter } : { status: { not: "APPROVED" } },
     orderBy: { createdAt: "desc" },
   });
 
@@ -27,9 +39,12 @@ export default async function AdminCandidaturasPage() {
       <div>
         <h1 className="text-2xl font-semibold">Candidaturas</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Candidaturas de fornecedores pendentes de aprovação, e o histórico das rejeitadas.
+          Candidaturas de fornecedores. Por omissão mostra pendentes e rejeitadas — filtra por
+          "Aprovado" para ver o histórico completo.
         </p>
       </div>
+
+      <CandidaturaFilters defaultValue={status ?? ""} />
 
       <Card>
         <CardHeader>
@@ -81,7 +96,7 @@ export default async function AdminCandidaturasPage() {
               {applications.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center text-muted-foreground">
-                    Sem candidaturas pendentes.
+                    Sem candidaturas.
                   </TableCell>
                 </TableRow>
               )}
