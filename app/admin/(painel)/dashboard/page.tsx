@@ -1,12 +1,16 @@
 import { prisma } from "@/lib/prisma";
 import type { OrderStatus } from "@/lib/generated/prisma/enums";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  Package,
+  ShoppingBag,
+  Euro,
+  TriangleAlert,
+  Store,
+  Percent,
+  Wallet,
+} from "lucide-react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 const LOW_STOCK_THRESHOLD = 5;
 const COUNTED_STATUSES: OrderStatus[] = ["PAID", "PROCESSING", "SHIPPED", "DELIVERED"];
@@ -40,43 +44,104 @@ export default async function AdminDashboardPage() {
 
   const totalAdminEarnings = adminOwnRevenue + vendorCommissionRevenue;
 
+  const hasLowStock = lowStockProducts.length > 0;
+
   const stats = [
-    { label: "Produtos", value: productCount },
-    { label: "Encomendas", value: orderCount },
-    { label: "Total vendido", value: `€${(revenue._sum.total ?? 0).toFixed(2)}` },
-    { label: "Stock baixo", value: lowStockProducts.length },
+    { label: "Produtos", value: String(productCount), icon: Package, tone: "neutral" as const },
+    { label: "Encomendas", value: String(orderCount), icon: ShoppingBag, tone: "neutral" as const },
+    {
+      label: "Total vendido",
+      value: `€${(revenue._sum.total ?? 0).toFixed(2)}`,
+      icon: Euro,
+      tone: "neutral" as const,
+    },
+    {
+      label: "Stock baixo",
+      value: String(lowStockProducts.length),
+      icon: TriangleAlert,
+      tone: hasLowStock ? ("warning" as const) : ("neutral" as const),
+    },
   ];
 
   const earningsStats = [
-    { label: "Vendas próprias (sem fornecedor)", value: `€${adminOwnRevenue.toFixed(2)}` },
-    { label: "Comissão das vendas dos fornecedores", value: `€${vendorCommissionRevenue.toFixed(2)}` },
-    { label: "Total ganho pelo admin", value: `€${totalAdminEarnings.toFixed(2)}`, highlight: true },
+    {
+      label: "Vendas próprias",
+      description: "Produtos sem fornecedor associado",
+      value: `€${adminOwnRevenue.toFixed(2)}`,
+      icon: Store,
+      highlight: false,
+    },
+    {
+      label: "Comissão de fornecedores",
+      description: "A tua parte nas vendas dos fornecedores",
+      value: `€${vendorCommissionRevenue.toFixed(2)}`,
+      icon: Percent,
+      highlight: false,
+    },
+    {
+      label: "Total ganho pelo admin",
+      description: "Vendas próprias + comissão",
+      value: `€${totalAdminEarnings.toFixed(2)}`,
+      icon: Wallet,
+      highlight: true,
+    },
   ];
 
+  const toneStyles = {
+    neutral: "bg-muted text-muted-foreground",
+    warning: "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400",
+  };
+
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Dashboard</h1>
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-2xl font-semibold">Dashboard</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Visão geral da loja Neto STP.</p>
+      </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
           <Card key={stat.label}>
-            <CardHeader>
-              <CardDescription>{stat.label}</CardDescription>
-              <CardTitle className="text-3xl">{stat.value}</CardTitle>
-            </CardHeader>
+            <CardContent className="flex items-center gap-4 py-1">
+              <div className={cn("flex size-11 shrink-0 items-center justify-center rounded-full", toneStyles[stat.tone])}>
+                <stat.icon className="size-5" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">{stat.label}</p>
+                <p className="text-2xl font-semibold leading-tight">{stat.value}</p>
+              </div>
+            </CardContent>
           </Card>
         ))}
       </div>
 
       <div>
-        <h2 className="mb-3 text-lg font-semibold">O que o admin ganha</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <h2 className="text-lg font-semibold">O que o admin ganha</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Receita separada entre as tuas vendas próprias e a comissão sobre vendas de fornecedores.
+        </p>
+
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
           {earningsStats.map((stat) => (
-            <Card key={stat.label} className={stat.highlight ? "border-primary" : undefined}>
-              <CardHeader>
-                <CardDescription>{stat.label}</CardDescription>
-                <CardTitle className="text-3xl">{stat.value}</CardTitle>
-              </CardHeader>
+            <Card
+              key={stat.label}
+              className={cn(stat.highlight && "border-primary bg-primary/5 ring-primary/20")}
+            >
+              <CardContent className="flex items-start gap-4 py-1">
+                <div
+                  className={cn(
+                    "flex size-11 shrink-0 items-center justify-center rounded-full",
+                    stat.highlight ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                  )}
+                >
+                  <stat.icon className="size-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">{stat.label}</p>
+                  <p className="text-xs text-muted-foreground">{stat.description}</p>
+                  <p className="mt-1 text-2xl font-semibold leading-tight">{stat.value}</p>
+                </div>
+              </CardContent>
             </Card>
           ))}
         </div>
@@ -84,23 +149,24 @@ export default async function AdminDashboardPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Produtos com stock baixo</CardTitle>
-          <CardDescription>
+          <div className="flex items-center gap-2">
+            <TriangleAlert className={cn("size-4", hasLowStock ? "text-amber-600" : "text-muted-foreground")} />
+            <p className="font-heading text-base font-medium">Produtos com stock baixo</p>
+          </div>
+          <p className="text-sm text-muted-foreground">
             Stock igual ou inferior a {LOW_STOCK_THRESHOLD} unidades
-          </CardDescription>
+          </p>
         </CardHeader>
         <CardContent>
           {lowStockProducts.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Nenhum produto com stock baixo.
-            </p>
+            <p className="text-sm text-muted-foreground">Nenhum produto com stock baixo.</p>
           ) : (
-            <ul className="space-y-2 text-sm">
+            <ul className="divide-y divide-border text-sm">
               {lowStockProducts.map((product) => (
-                <li key={product.id} className="flex justify-between">
+                <li key={product.id} className="flex items-center justify-between py-2 first:pt-0 last:pb-0">
                   <span>{product.name}</span>
-                  <span className="text-muted-foreground">
-                    {product.stock} unidades
+                  <span className="font-medium text-amber-700 dark:text-amber-400">
+                    {product.stock} {product.stock === 1 ? "unidade" : "unidades"}
                   </span>
                 </li>
               ))}
