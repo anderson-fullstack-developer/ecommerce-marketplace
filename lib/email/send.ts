@@ -7,6 +7,7 @@ import {
   orderStatusUpdateEmail,
   vendorApplicationReceivedEmail,
   vendorApprovedEmail,
+  vendorHelpMessageAdminEmail,
   vendorRejectedEmail,
   vendorSaleEmail,
   type OrderEmailItem,
@@ -78,6 +79,24 @@ export async function sendNewVendorApplicationAdminEmail(params: {
 
   const { subject, html } = newVendorApplicationAdminEmail(params);
   await sendEmail({ to: [{ email: adminEmail }], subject, html });
+}
+
+export async function sendVendorHelpMessageEmail(params: {
+  vendorName: string;
+  vendorEmail: string;
+  subject: string;
+  message: string;
+}) {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (!adminEmail) return;
+
+  const { subject, html } = vendorHelpMessageAdminEmail(params);
+  await sendEmail({
+    to: [{ email: adminEmail }],
+    subject,
+    html,
+    replyTo: { email: params.vendorEmail, name: params.vendorName },
+  });
 }
 
 export async function sendVendorSaleEmail(params: {

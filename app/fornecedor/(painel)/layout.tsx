@@ -22,6 +22,7 @@ export default async function VendorPanelLayout({
     { href: "/fornecedor/painel", label: "Painel", badge: newOrderItems.length },
     { href: "/fornecedor/produtos", label: "Produtos" },
     { href: "/fornecedor/saldo", label: "Saldo" },
+    { href: "/fornecedor/ajuda", label: "Ajuda" },
   ];
 
   return (

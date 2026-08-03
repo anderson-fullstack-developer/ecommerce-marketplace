@@ -267,6 +267,28 @@ export function newVendorApplicationAdminEmail(params: {
   };
 }
 
+export function vendorHelpMessageAdminEmail(params: {
+  vendorName: string;
+  vendorEmail: string;
+  subject: string;
+  message: string;
+}) {
+  const body = `
+    <p style="margin:0 0 12px;font-size:15px;">Novo pedido de contacto de um fornecedor.</p>
+    <table role="presentation" width="100%" style="font-size:14px;line-height:1.7;margin:16px 0;">
+      <tr><td style="color:${COLORS.muted};width:90px;">Fornecedor</td><td>${escapeHtml(params.vendorName)}</td></tr>
+      <tr><td style="color:${COLORS.muted};">Email</td><td>${escapeHtml(params.vendorEmail)}</td></tr>
+      <tr><td style="color:${COLORS.muted};">Assunto</td><td>${escapeHtml(params.subject)}</td></tr>
+    </table>
+    <p style="margin:16px 0 4px;font-size:13px;color:${COLORS.muted};">Mensagem</p>
+    <p style="margin:0;white-space:pre-line;font-size:15px;">${escapeHtml(params.message)}</p>
+  `;
+  return {
+    subject: `Pedido de contacto: fornecedor "${params.vendorName}" — ${params.subject}`,
+    html: emailShell("Pedido de contacto de fornecedor", body),
+  };
+}
+
 export function vendorSaleEmail(params: {
   vendorName: string;
   orderId: string;

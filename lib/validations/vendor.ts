@@ -11,3 +11,10 @@ export const vendorApplicationSchema = z.object({
 });
 
 export type VendorApplicationInput = z.infer<typeof vendorApplicationSchema>;
+
+export const vendorHelpMessageSchema = z.object({
+  subject: z.string().min(1, "Assunto obrigatório"),
+  message: z.string().min(1, "Mensagem obrigatória"),
+});
+
+export type VendorHelpMessageInput = z.infer<typeof vendorHelpMessageSchema>;
