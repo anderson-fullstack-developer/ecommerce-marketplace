@@ -10,13 +10,9 @@ import crypto from "node:crypto";
 import pg from "pg";
 
 const TARGET = [
-  { name: "Café", slug: "cafe" },
-  { name: "Cacau", slug: "cacau" },
-  { name: "Chocolate", slug: "chocolate" },
-  { name: "Produtos da roça", slug: "produtos-da-roca" },
+  { name: "Doces", slug: "doces" },
+  { name: "Alimentos", slug: "alimentos" },
   { name: "Artesanato", slug: "artesanato" },
-  { name: "Cultura", slug: "cultura" },
-  { name: "Presentes", slug: "presentes" },
 ];
 
 const url = process.env.DATABASE_URL;
