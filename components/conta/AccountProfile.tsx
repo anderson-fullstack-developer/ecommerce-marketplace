@@ -22,7 +22,7 @@ export function AccountProfile({
       <UserProfile.Page label="account" />
       <UserProfile.Page label="security" />
       <UserProfile.Page
-        label="As minhas encomendas"
+        label="Encomendas"
         labelIcon={<Package className="size-4" />}
         url="encomendas"
       >
