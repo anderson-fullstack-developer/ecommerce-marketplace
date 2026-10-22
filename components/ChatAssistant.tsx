@@ -250,14 +250,14 @@ export function ChatAssistant() {
           </div>
 
           {messages.length > 1 && (
-            <div className="flex gap-1.5 overflow-x-auto border-t bg-background px-3 py-2 scrollbar-none">
+            <div className="flex flex-wrap gap-1.5 border-t bg-background px-3 py-2">
               {QUICK_REPLIES.map((quickReply) => (
                 <button
                   key={quickReply.label}
                   type="button"
                   onClick={() => sendQuestion(quickReply.question)}
                   disabled={isTyping}
-                  className="shrink-0 rounded-full border border-primary/30 px-2.5 py-1 text-xs whitespace-nowrap text-primary transition hover:bg-primary/5 disabled:opacity-50"
+                  className="rounded-full border border-primary/30 px-2.5 py-1 text-xs whitespace-nowrap text-primary transition hover:bg-primary/5 disabled:opacity-50"
                 >
                   {quickReply.label}
                 </button>
