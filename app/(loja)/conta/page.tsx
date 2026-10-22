@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { UserProfile } from "@clerk/nextjs";
-import { ChevronRight, LifeBuoy, MapPin, Package } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getCurrentCustomer } from "@/lib/customer";
 import { FREE_SHIPPING_THRESHOLD, SHIPPING_FEE } from "@/lib/shipping";
 import { Button } from "@/components/ui/button";
 import { CustomerSignOutButton } from "@/components/CustomerSignOutButton";
 import { ShippingDetailsForm } from "@/components/conta/ShippingDetailsForm";
+import { AccountProfile } from "@/components/conta/AccountProfile";
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: "Pendente",
@@ -54,15 +54,8 @@ export default async function ContaPage() {
       </div>
 
       <div className="mt-6 flex justify-center">
-        <UserProfile routing="hash">
-          <UserProfile.Page label="account" />
-          <UserProfile.Page label="security" />
-
-          <UserProfile.Page
-            label="As minhas encomendas"
-            labelIcon={<Package className="size-4" />}
-            url="encomendas"
-          >
+        <AccountProfile
+          orders={
             <section className="space-y-6">
               <div>
                 <h2 className="text-lg font-semibold">As minhas encomendas</h2>
@@ -88,7 +81,9 @@ export default async function ContaPage() {
 
               {orders.length === 0 ? (
                 <div className="rounded-lg border border-dashed p-6 text-center">
-                  <p className="text-sm text-muted-foreground">Ainda não fizeste nenhuma encomenda.</p>
+                  <p className="text-sm text-muted-foreground">
+                    Ainda não fizeste nenhuma encomenda.
+                  </p>
                   <Button
                     render={<Link href="/loja" />}
                     nativeButton={false}
@@ -139,19 +134,14 @@ export default async function ContaPage() {
                 </ul>
               )}
             </section>
-          </UserProfile.Page>
-
-          <UserProfile.Page
-            label="Morada e contacto"
-            labelIcon={<MapPin className="size-4" />}
-            url="morada"
-          >
+          }
+          shipping={
             <section className="space-y-6">
               <div>
                 <h2 className="text-lg font-semibold">Morada e contacto</h2>
                 <p className="text-sm text-muted-foreground">
-                  Os teus dados de entrega. São atualizados sempre que fazes uma compra com a
-                  morada indicada no pagamento.
+                  Os teus dados de entrega. São atualizados sempre que fazes uma compra com a morada
+                  indicada no pagamento.
                 </p>
               </div>
               <ShippingDetailsForm
@@ -163,9 +153,8 @@ export default async function ContaPage() {
                 }}
               />
             </section>
-          </UserProfile.Page>
-
-          <UserProfile.Page label="Ajuda" labelIcon={<LifeBuoy className="size-4" />} url="ajuda">
+          }
+          help={
             <section className="space-y-6">
               <div>
                 <h2 className="text-lg font-semibold">Ajuda</h2>
@@ -183,9 +172,21 @@ export default async function ContaPage() {
 
               <ul className="divide-y divide-border rounded-lg border text-sm">
                 {[
-                  { href: "/contacto", label: "Contactar a loja", hint: "Dúvidas sobre produtos ou encomendas" },
-                  { href: "/reclamacoes", label: "Fazer uma reclamação", hint: "Algum problema com uma compra" },
-                  { href: "/torna-te-vendedor", label: "Torna-te vendedor", hint: "Vende os teus produtos na Neto STP" },
+                  {
+                    href: "/contacto",
+                    label: "Contactar a loja",
+                    hint: "Dúvidas sobre produtos ou encomendas",
+                  },
+                  {
+                    href: "/reclamacoes",
+                    label: "Fazer uma reclamação",
+                    hint: "Algum problema com uma compra",
+                  },
+                  {
+                    href: "/torna-te-vendedor",
+                    label: "Torna-te vendedor",
+                    hint: "Vende os teus produtos na Neto STP",
+                  },
                 ].map((link) => (
                   <li key={link.href}>
                     <Link
@@ -202,8 +203,8 @@ export default async function ContaPage() {
                 ))}
               </ul>
             </section>
-          </UserProfile.Page>
-        </UserProfile>
+          }
+        />
       </div>
     </div>
   );

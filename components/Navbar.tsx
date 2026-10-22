@@ -1,9 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Package, User } from "lucide-react";
-import { UserButton } from "@clerk/nextjs";
+import { User } from "lucide-react";
 import { auth } from "@clerk/nextjs/server";
 import { CartLink } from "@/components/CartLink";
+import { CustomerUserButton } from "@/components/CustomerUserButton";
 
 export async function Navbar() {
   const { userId } = await auth();
@@ -33,15 +33,7 @@ export async function Navbar() {
             Torna-te vendedor
           </Link>
           {userId ? (
-            <UserButton userProfileMode="navigation" userProfileUrl="/conta">
-              <UserButton.MenuItems>
-                <UserButton.Link
-                  label="As minhas encomendas"
-                  labelIcon={<Package className="size-4" />}
-                  href="/conta/encomendas"
-                />
-              </UserButton.MenuItems>
-            </UserButton>
+            <CustomerUserButton />
           ) : (
             <Link
               href="/conta/login"
