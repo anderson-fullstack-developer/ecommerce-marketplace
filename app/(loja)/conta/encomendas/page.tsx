@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { auth } from "@/auth";
+import { notFound } from "next/navigation";
+import { getCurrentCustomer } from "@/lib/customer";
 import { prisma } from "@/lib/prisma";
-import { SignOutButton } from "@/components/admin/SignOutButton";
+import { CustomerSignOutButton } from "@/components/CustomerSignOutButton";
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: "Pendente",
@@ -13,8 +14,9 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export default async function CustomerOrdersPage() {
-  const session = await auth();
-  const customerId = session!.user.id;
+  const customer = await getCurrentCustomer();
+  if (!customer) notFound();
+  const customerId = customer.id;
 
   const orders = await prisma.order.findMany({
     where: { customerId },
@@ -30,9 +32,9 @@ export default async function CustomerOrdersPage() {
             ← Definições
           </Link>
           <h1 className="mt-1 font-heading text-3xl font-semibold">As minhas encomendas</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{session!.user.email}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{customer.email}</p>
         </div>
-        <SignOutButton callbackUrl="/" />
+        <CustomerSignOutButton />
       </div>
 
       {orders.length === 0 ? (

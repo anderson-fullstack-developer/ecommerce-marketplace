@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { z } from "zod";
-import { auth } from "@/auth";
+import { getCurrentCustomer } from "@/lib/customer";
 import { prisma } from "@/lib/prisma";
 import { getStripe } from "@/lib/stripe";
 import { calculateShipping } from "@/lib/shipping";
@@ -17,8 +17,8 @@ const checkoutInputSchema = z
   .min(1, "O carrinho está vazio");
 
 export async function createCheckoutSession(input: unknown) {
-  const session = await auth();
-  if (session?.user?.role !== "CUSTOMER" || !session.user.email) {
+  const customer = await getCurrentCustomer({ syncEmail: true });
+  if (!customer) {
     throw new Error("Tens de iniciar sessão para finalizar a compra.");
   }
 
@@ -77,7 +77,8 @@ export async function createCheckoutSession(input: unknown) {
     ],
     success_url: `${origin}/sucesso?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}/carrinho`,
-    customer_email: session.user.email,
+    customer_email: customer.email,
+    client_reference_id: customer.id,
     billing_address_collection: "required",
     shipping_address_collection: { allowed_countries: ["PT"] },
     phone_number_collection: { enabled: true },

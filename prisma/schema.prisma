@@ -56,7 +56,7 @@ model Customer {
   id                  String     @id @default(cuid())
   name                String
   email               String     @unique
-  googleId            String?    @unique
+  clerkUserId         String?    @unique
   password            String?
   resetToken          String?    @unique
   resetTokenExpiresAt DateTime?

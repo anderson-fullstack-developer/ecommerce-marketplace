@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { auth } from "@/auth";
+import { getCurrentCustomer } from "@/lib/customer";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { OrderStatusTimeline } from "@/components/admin/OrderStatusTimeline";
@@ -11,14 +11,14 @@ export default async function CustomerOrderDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const session = await auth();
+  const customer = await getCurrentCustomer();
 
   const order = await prisma.order.findUnique({
     where: { id },
     include: { items: { include: { product: true } } },
   });
 
-  if (!order || order.customerId !== session!.user.id) notFound();
+  if (!order || !customer || order.customerId !== customer.id) notFound();
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">

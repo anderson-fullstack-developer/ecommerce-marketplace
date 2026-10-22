@@ -1,6 +1,6 @@
 "use server";
 
-import { auth } from "@/auth";
+import { requireCurrentCustomer } from "@/lib/customer";
 import { prisma } from "@/lib/prisma";
 
 export type ServerCartItem = {
@@ -16,11 +16,8 @@ export type ServerCartItem = {
 export type AddItemResult = "ok" | "capped" | "maxed";
 
 async function requireCustomerId() {
-  const session = await auth();
-  if (session?.user?.role !== "CUSTOMER") {
-    throw new Error("Não autenticado.");
-  }
-  return session.user.id;
+  const customer = await requireCurrentCustomer();
+  return customer.id;
 }
 
 async function loadCart(customerId: string): Promise<ServerCartItem[]> {

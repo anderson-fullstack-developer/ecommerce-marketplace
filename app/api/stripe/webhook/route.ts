@@ -109,7 +109,18 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, siteUrl
     country: shippingDetails?.address.country ?? customerDetails?.address?.country ?? "",
   };
 
-  const customer = customerData.email
+  // O checkout envia o id do Customer em client_reference_id — liga a encomenda à conta
+  // certa mesmo que o email na Stripe seja diferente. O email da conta não é alterado aqui.
+  const referencedCustomer = session.client_reference_id
+    ? await prisma.customer.findUnique({ where: { id: session.client_reference_id } })
+    : null;
+
+  const customer = referencedCustomer
+    ? await prisma.customer.update({
+        where: { id: referencedCustomer.id },
+        data: { ...customerData, email: referencedCustomer.email },
+      })
+    : customerData.email
     ? await prisma.customer.upsert({
         where: { email: customerData.email },
         create: customerData,

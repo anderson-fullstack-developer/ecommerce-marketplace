@@ -54,29 +54,6 @@ export const authConfig = {
         return redirectToLogin("/fornecedor/login");
       }
 
-      if (pathname.startsWith("/conta")) {
-        const isPublicPage =
-          pathname === "/conta/login" ||
-          pathname === "/conta/registar" ||
-          pathname === "/conta/recuperar" ||
-          pathname.startsWith("/conta/redefinir/");
-
-        if (isPublicPage) {
-          if (isLoggedIn && role === "CUSTOMER") {
-            return Response.redirect(new URL("/conta/encomendas", nextUrl));
-          }
-          return true;
-        }
-
-        if (isLoggedIn && role === "CUSTOMER") return true;
-        return redirectToLogin("/conta/login");
-      }
-
-      if (pathname.startsWith("/checkout")) {
-        if (isLoggedIn && role === "CUSTOMER") return true;
-        return redirectToLogin("/conta/login");
-      }
-
       return true;
     },
   },

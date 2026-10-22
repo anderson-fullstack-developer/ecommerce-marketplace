@@ -1,12 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
-import { User } from "lucide-react";
-import { auth } from "@/auth";
+import { Package, User } from "lucide-react";
+import { UserButton } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { CartLink } from "@/components/CartLink";
 
 export async function Navbar() {
-  const session = await auth();
-  const isCustomer = session?.user?.role === "CUSTOMER";
+  const { userId } = await auth();
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80">
@@ -32,14 +32,26 @@ export async function Navbar() {
           <Link href="/torna-te-vendedor" className="hidden hover:text-primary sm:inline">
             Torna-te vendedor
           </Link>
-          <Link
-            href={isCustomer ? "/conta" : "/conta/login"}
-            className="flex items-center hover:text-primary"
-            aria-label={isCustomer ? "Definições da conta" : "Entrar ou criar conta"}
-            title={isCustomer ? "Definições da conta" : "Entrar ou criar conta"}
-          >
-            <User className="size-5" />
-          </Link>
+          {userId ? (
+            <UserButton userProfileMode="navigation" userProfileUrl="/conta">
+              <UserButton.MenuItems>
+                <UserButton.Link
+                  label="As minhas encomendas"
+                  labelIcon={<Package className="size-4" />}
+                  href="/conta/encomendas"
+                />
+              </UserButton.MenuItems>
+            </UserButton>
+          ) : (
+            <Link
+              href="/conta/login"
+              className="flex items-center hover:text-primary"
+              aria-label="Entrar ou criar conta"
+              title="Entrar ou criar conta"
+            >
+              <User className="size-5" />
+            </Link>
+          )}
           <CartLink />
         </nav>
       </div>
