@@ -10,8 +10,9 @@ import { prisma } from "@/lib/prisma";
  * se o Clerk tiver esse email verificado — senão bastava alguém registar-se com o
  * email de outra pessoa para ver as encomendas dela.
  *
- * `syncEmail: true` volta a ler o email principal no Clerk e atualiza o `Customer`
- * se o cliente o tiver mudado nas definições (usado no checkout, onde o email conta).
+ * `syncEmail: true` volta a ler o utilizador no Clerk e atualiza o email principal e o
+ * nome do `Customer` se o cliente os tiver mudado nas definições (usado no checkout,
+ * onde o email conta, e na página /conta).
  */
 export async function getCurrentCustomer(options: { syncEmail?: boolean } = {}) {
   const { userId } = await auth();
@@ -27,12 +28,17 @@ export async function getCurrentCustomer(options: { syncEmail?: boolean } = {}) 
   }
 
   const email = primaryEmail.emailAddress.toLowerCase();
+  const clerkName = [user.firstName, user.lastName].filter(Boolean).join(" ");
 
   if (linked) {
-    if (linked.email === email) return linked;
-    const taken = await prisma.customer.findUnique({ where: { email } });
-    if (taken) return linked;
-    return prisma.customer.update({ where: { id: linked.id }, data: { email } });
+    const data: { email?: string; name?: string } = {};
+    if (clerkName && clerkName !== linked.name) data.name = clerkName;
+    if (linked.email !== email) {
+      const taken = await prisma.customer.findUnique({ where: { email } });
+      if (!taken) data.email = email;
+    }
+    if (Object.keys(data).length === 0) return linked;
+    return prisma.customer.update({ where: { id: linked.id }, data });
   }
 
   // Contas antigas podem ter o email guardado com maiúsculas — comparar sem diferenciar.
@@ -46,8 +52,7 @@ export async function getCurrentCustomer(options: { syncEmail?: boolean } = {}) 
     });
   }
 
-  const name =
-    [user.firstName, user.lastName].filter(Boolean).join(" ") || email.split("@")[0];
+  const name = clerkName || email.split("@")[0];
 
   return prisma.customer.create({
     data: {
