@@ -9,13 +9,18 @@ import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/conta/encomendas";
-  const [formError, setFormError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(
+    searchParams.get("erro") === "google"
+      ? "Não foi possível entrar com Google: o email da conta Google não está verificado."
+      : null
+  );
 
   const {
     register,
@@ -49,6 +54,14 @@ function LoginForm() {
         <div className="space-y-1 text-center">
           <h1 className="text-2xl font-semibold">Entrar</h1>
           <p className="text-sm text-muted-foreground">Neto STP</p>
+        </div>
+
+        <GoogleSignInButton callbackUrl={callbackUrl} />
+
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          <span className="h-px flex-1 bg-border" />
+          ou
+          <span className="h-px flex-1 bg-border" />
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

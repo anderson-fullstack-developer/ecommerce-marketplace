@@ -9,6 +9,7 @@ import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 import {
   customerRegisterSchema,
   type CustomerRegisterInput,
@@ -68,6 +69,17 @@ function RegisterForm() {
           <p className="text-sm text-muted-foreground">
             Cria uma conta para veres o estado das tuas encomendas.
           </p>
+        </div>
+
+        <GoogleSignInButton
+          callbackUrl={explicitCallbackUrl || "/?bemvindo=1"}
+          label="Criar conta com Google"
+        />
+
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          <span className="h-px flex-1 bg-border" />
+          ou
+          <span className="h-px flex-1 bg-border" />
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

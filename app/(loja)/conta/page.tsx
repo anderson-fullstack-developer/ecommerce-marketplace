@@ -1,16 +1,20 @@
 import Link from "next/link";
+import { CheckCircle2 } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SignOutButton } from "@/components/admin/SignOutButton";
+import { GoogleSignInButton } from "@/components/GoogleSignInButton";
+import { ProfileForm } from "@/components/conta/ProfileForm";
+import { PasswordForm } from "@/components/conta/PasswordForm";
 
 export default async function ContaPage() {
   const session = await auth();
 
   const customer = await prisma.customer.findUniqueOrThrow({
     where: { id: session!.user.id },
-    select: { name: true, email: true },
+    select: { name: true, email: true, phone: true, password: true, googleId: true },
   });
 
   return (
@@ -24,18 +28,47 @@ export default async function ContaPage() {
         <CardHeader>
           <CardTitle>Os teus dados</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <p className="text-sm text-muted-foreground">Nome</p>
-            <p className="font-medium">{customer.name}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Email</p>
-            <p className="font-medium">{customer.email}</p>
-          </div>
-          <p className="border-t pt-3 text-xs text-muted-foreground">
-            A edição dos teus dados está em manutenção — em breve vais poder atualizá-los aqui.
-          </p>
+        <CardContent>
+          <ProfileForm
+            email={customer.email}
+            defaultValues={{ name: customer.name, phone: customer.phone }}
+          />
+        </CardContent>
+      </Card>
+
+      <Card className="mt-4">
+        <CardHeader>
+          <CardTitle>Password</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <PasswordForm hasPassword={!!customer.password} />
+        </CardContent>
+      </Card>
+
+      <Card className="mt-4">
+        <CardHeader>
+          <CardTitle>Contas ligadas</CardTitle>
+          <CardDescription>Formas de entrares na tua conta.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {customer.googleId ? (
+            <p className="flex items-center gap-2 text-sm">
+              <CheckCircle2 className="size-4 text-primary" />
+              Conta Google ligada
+            </p>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Liga a conta Google com o email <strong>{customer.email}</strong> para entrares
+                com um clique.
+              </p>
+              <GoogleSignInButton
+                callbackUrl="/conta"
+                label="Ligar conta Google"
+                loginHint={customer.email}
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
 
